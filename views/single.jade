@@ -1,0 +1,111 @@
+doctype 5
+html(lang="en")
+  head
+    title single
+
+    link(rel='stylesheet', href='css/single.css', type='text/css', media='screen')
+    script(type="text/javascript", src="http://code.jquery.com/jquery-1.10.2.min.js")
+    script(type="text/javascript", src="/fullscreen/jquery.fullscreen.js")
+    script(type="text/javascript", src="/socket.io/socket.io.js")
+    script(type="text/javascript", src="histogram-0.1.5/histogram.min.js")
+    script(type='text/javascript').
+
+      function loadImage(imageName)
+      {
+         $('#main').attr('src', imageName).attr('alt', imageName);
+         $('#imageName').text(imageName);
+      }
+      
+      function loadHistogram(hisImageName)
+      {
+        if (hisImageName == '')
+        {
+          $('#his').hide();
+        }
+        else
+        {
+          $('#his').attr('src', hisImageName).attr('alt', hisImageName);
+          $('#his').show();
+        }
+      }
+
+      function updateProgressBar(percent) 
+      {
+        if (percent == 0.0 || percent == 100.0)
+        {
+          $('#progressBar').hide();
+        }
+        else
+        {
+          var progressBarWidth = percent * $('#progressBar').width() / 100.0;
+          $('#progressBarDiv').animate({ width: progressBarWidth }, 100);
+          $('#progressBar').show();
+        }
+      }
+      
+      function queueUpdated(qLength)
+      {
+        if (qLength == 0)
+        {
+           $('#queueLength.exifBox').hide();
+        }
+        else
+        {
+          $('#queueLength.exifBox').text('Queue: ' + qLength).show();
+        }
+      }
+      
+      function attachFullScreenEvent()
+      {
+         if($.support.fullscreen) 
+         {
+           $('#container').click(function(e) {
+             $('#container').fullScreen();
+           });
+         }
+      }
+      
+      function setExifInfo(exifData)
+      {
+        $('#exifISO').text('ISO' + exifData.iso);
+        $('#exifAperture').text('f' + exifData.aperture);
+        $('#exifShutterSpeed').text(exifData.shutterSpeed + 's');
+        $('#exifFocalLength').text(exifData.focalLength + 'mm');
+      }
+      
+      function setupSocket() {
+        var socket = io.connect('http://pogo:8080');
+        socket.on('newFile', function(data) {
+          loadImage(data.fileName);
+          setExifInfo(data.exifData);
+          loadHistogram(data.histogramName);
+        });
+        socket.on('uploadingImage', function(data) {
+          updateProgressBar(data.percent);
+        });
+        socket.on('queueUpdated', function(data) {
+          queueUpdated(data.queueLength);
+        });
+      }
+
+      $(document).ready(function() {
+        setupSocket();
+        loadImage('eyefi.gif');
+        loadHistogram('');
+        updateProgressBar(0.0);
+        attachFullScreenEvent();
+      });
+
+  body
+    #container
+      #imageName imageName
+      #exifInfo
+        #exifISO.exifBox ISO
+        #exifAperture.exifBox F
+        #exifShutterSpeed.exifBox S
+        #exifFocalLength.exifBox FL
+        #queueLength.exifBox Queue
+      #progressBar
+        #progressBarDiv
+      img#main(src='', alt='no image')
+      img#his(src='', alt='no histogram')
