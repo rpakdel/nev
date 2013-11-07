@@ -16,4 +16,4 @@ Installation
 ============
 
 - Install GraphicsMagick.
-- setup your card key in config.js.
+- setup your card key in app.js.
