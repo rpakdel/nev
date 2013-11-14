@@ -10,9 +10,8 @@ var config = require('./config.js');
 var api = require('./api.js');
 var eyefi = require('eyefi');
 var exif = require('exif2');
-var gm = require('gm');
 var exec = require('child_process').exec;
-var histogram = require('histogram');
+var mycards = require('./mycards.js');
 
 var queue = [];
 
@@ -68,13 +67,7 @@ setInterval(checkQueue, 5000);
 var eyefiServer = eyefi(
 {
   uploadPath : config.uploadDir,
-  cards : 
-  {
-    "001856424d39": 
-    {
-      uploadKey: "57fe2eb19de3da0760e8767f9ee8e7b2"
-    }
-  }
+  cards : mycards.card1
  }).start();
 
 eyefiServer.on('imageReceived', function(data) {
