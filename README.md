@@ -15,5 +15,7 @@ Notes
 Installation
 ============
 
-- Install GraphicsMagick.
+- Follow the Preparation section of https://npmjs.org/package/eyefi
+- Install GraphicsMagick and ensure it is available on the PATH
+- Install ExifTool (http://www.sno.phy.queensu.ca/~phil/exiftool/) and ensure it is available on the PATH. 
 - setup your card key in app.js.

@@ -1,6 +1,7 @@
 var path = require('path');
+var address = require('network-address');
 
-var httpServerIP = require('os').networkInterfaces().eth0[0].address;
+var httpServerIP = address();
 var httpServerPort = 8080;
 var uploadDir = path.join(__dirname, 'public', 'eyefi');
 var thumbsDir = path.join(__dirname, 'public', 'thumbs');

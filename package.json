@@ -12,6 +12,7 @@
     "eyefi": "*",
     "exif2": "*",
     "gm": "*",
-    "progress-bar": "*"
+    "progress-bar": "*",
+    "network-address": "0.0.4"
   }
 }
