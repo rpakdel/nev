@@ -12,13 +12,9 @@ var api = require('./api.js');
 var mycards = require('./mycards.js');
 var imgPrc = require('./imageProcessor.js');
 
-var queue = [];
+var exampleFile = path.join(config.uploadDir, 'example.jpg');
 
-//prepareFile('DSC_1412.JPG');
-//prepareFile('DSC_1413.JPG');
-//prepareFile('DSC_1414.JPG');
-//prepareFile('DSC_1415.JPG');
-//prepareFile('DSC_1416.JPG');
+var queue = [];
 
 function emitQueueUpdated()
 {
@@ -102,7 +98,7 @@ function configure()
   app.use(express.logger('dev'));
  
   app.use(express.static(__dirname + path.join('/public', 'images')));
-  app.use(express.static(__dirname + path.join('/public', 'eyefi')));
+  app.use(express.static(__dirname + path.join('/public', 'eyefi')));   
   app.use(express.static(__dirname + '/public'));
 }
 
@@ -120,7 +116,6 @@ app.get('/api/images', api.getImages);
 
 io.sockets.on('connection', function(client) {
   console.log('> Client ' + client.id + ' connected.');
-  var exampleFile = path.join(config.uploadDir, 'DSC_1412.JPG');
   imgPrc.createHistogram(exampleFile, function(error) {
       if (error)
       {
