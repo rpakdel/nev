@@ -64,17 +64,30 @@ html(lang="en")
            });
          }
       }
+
+      function setElementExifData(element, data, pre, post)
+      {
+        if (data)
+        {
+          element.text(pre + data + post);
+          element.show();
+        }
+        else
+        {
+          element.hide();
+        }
+      }
       
       function setExifInfo(exifData)
       {
-        $('#exifISO').text('ISO' + exifData.iso);
-        $('#exifAperture').text('f' + exifData.aperture);
-        $('#exifShutterSpeed').text(exifData.shutterSpeed + 's');
-        $('#exifFocalLength').text(exifData.focalLength + 'mm');
+        setElementExifData($('#exifISO'), exifData.iso, 'ISO', '');
+        setElementExifData($('#exifAperture'), exifData.aperture, 'f', '');
+        setElementExifData($('#exifShutterSpeed'), exifData.shutterSpeed, '', 's');
+        setElementExifData($('#exifFocalLength'), exifData.focalLength, '', 'mm');        
       }
       
       function setupSocket() {
-        var socket = io.connect('http://pogo:8080');
+        var socket = io.connect('#{serverIp}');
         socket.on('newFile', function(data) {
           loadImage(data.fileName);
           setExifInfo(data.exifData);

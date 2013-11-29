@@ -12,7 +12,7 @@ var api = require('./api.js');
 var mycards = require('./mycards.js');
 var imgPrc = require('./imageProcessor.js');
 
-var exampleFile = path.join(config.uploadDir, 'example.jpg');
+var exampleFile = path.join(config.imagesDir, 'example.jpg');
 
 var queue = [];
 

@@ -184,11 +184,26 @@ function getExifData(f, result, callback)
     else
     {
       console.log('> got EXIF data.');
-      //console.log(exifData);
-      result.iso = exifData['iso'];
-      result.aperture = exifData['aperture'];
-      result.focalLength = exifData['focal length'].match(focalLengthRegExp);
-      result.shutterSpeed = exifData['shutter speed'];
+      if (exifData['iso'])
+      {
+        result.iso = exifData['iso'];
+      }
+
+      if (exifData['aperture'])
+      {
+        result.aperture = exifData['aperture'];
+      }
+
+      if (exifData['focal length'])
+      {
+        result.focalLength = exifData['focal length'].match(focalLengthRegExp)[0];
+      }
+
+      if (exifData['shutter speed'])
+      {
+        result.shutterSpeed = exifData['shutter speed'];
+      }
+
       callback(null);
     }
   });
