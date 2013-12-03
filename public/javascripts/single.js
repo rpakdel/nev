@@ -73,14 +73,28 @@ function setExifInfo(exifData)
     setElementExifData($('#exifShutterSpeed'), exifData.shutterSpeed, '', 's');
     setElementExifData($('#exifFocalLength'), exifData.focalLength, '', 'mm');        
 }
+
+function getExifInfo(fileName)
+{
+    $.get('exif/' + fileName, function(exifData) {
+        setExifInfo(exifData);
+    });
+}
+
+function getHistogram(fileName)
+{
+    $.get('histogram/' + fileName, function(data) {
+        loadHistogram(data.histogramName);
+    });
+}
       
 function setupSocket() 
 {
     var socket = io.connect('#{serverIp}');
     socket.on('newFile', function(data) {
         loadImage(data.fileName);
-        setExifInfo(data.exifData);
-        loadHistogram(data.histogramName);
+        getExifInfo(data.fileName);
+        getHistogram(data.fileName);
     });
 
     socket.on('uploadingImage', function(data) {
@@ -95,8 +109,8 @@ function setupSocket()
 function initializeSingle()
 {
     setupSocket();
-        loadImage('eyefi.gif');
-        loadHistogram('');
-        updateProgressBar(0.0);
-        attachFullScreenEvent();
+    loadImage('eyefi.gif');
+    loadHistogram('');
+    updateProgressBar(0.0);
+    attachFullScreenEvent();
 }

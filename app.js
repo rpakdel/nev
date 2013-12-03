@@ -6,14 +6,13 @@ var fs = require('fs');
 var path = require('path');
 var eyefi = require('eyefi');
 
-var routes = require('./routes.js');
+var routes = require('./routes/index.js');
 var config = require('./config.js');
 var api = require('./api.js');
 var mycards = require('./mycards.js');
 var imgPrc = require('./imageProcessor.js');
 
-var exampleFile = path.join(config.imagesDir, 'example.jpg');
-
+var exampleFile = path.join(config.uploadDir, 'example.jpg');
 var queue = [];
 
 function emitQueueUpdated()
@@ -56,14 +55,8 @@ eyefiServer.on('imageReceived', function(data) {
   {
     console.log();
     console.log('> Eyefi server received an image: ' + f);
-    imgPrc.createHistogram(f, function(error) {
-      if (error)
-      {
-        console.log('! No histogram created for ' + f);
-      }
-      queue.push(f);
-      emitQueueUpdated();
-    });
+    queue.push(f);
+    emitQueueUpdated();
   }
 });
 
@@ -97,9 +90,11 @@ function configure()
 
   app.use(express.logger('dev'));
  
-  app.use(express.static(__dirname + path.join('/public', 'images')));
-  app.use(express.static(__dirname + path.join('/public', 'eyefi')));   
-  app.use(express.static(__dirname + '/public'));
+  app.use(express.static(config.imagesDir));
+  app.use(express.static(config.uploadDir));   
+  app.use(express.static(config.publicDir));
+
+  
 }
 
 function configureDev()
@@ -113,51 +108,33 @@ app.configure('development', configureDev);
 app.get('/', routes.index);
 app.get('/single', routes.single);
 app.get('/api/images', api.getImages);
+app.get('/exif/:f', require('./routes/exif.js').getExif);
+app.get('/histogram/:f', require('./routes/histogram.js').getHistogram);
 
 io.sockets.on('connection', function(client) {
   console.log('> Client ' + client.id + ' connected.');
-  imgPrc.createHistogram(exampleFile, function(error) {
-      if (error)
-      {
-        console.log('! No histogram created for ' + exampleFile);
-      }
-      queue.push(exampleFile);
-      emitQueueUpdated();
-   });
+  queue.push(exampleFile);
+  emitQueueUpdated();
 });
 
 io.sockets.on('disconnect', function(client) {
   console.log('> Client ' + client.id + ' disconnected.');
 });
 
-function emitNewFile(baseName, thumbName, histogramName, exifData)
+function emitNewFile(baseName, thumbName)
 {
   io.sockets.emit('newFile', { 
     fileName: baseName, 
-    thumbName: thumbName,
-    histogramName: histogramName,
-    exifData: exifData,
+    thumbName: thumbName
   });
 }
 
 function onNewFile(f) 
-{
-  console.log('> Preparing ' + f + ' for clients.');
-  var thumbName = imgPrc.getThumbName(f);
-  var thumbPath = imgPrc.getThumbPath(f);
-  var hisName = imgPrc.getHisName(thumbPath);
+{  
+  var thumbName = imgPrc.getThumbName(f);  
   
-  var exifData = {
-    iso: '',
-    aperture: '',
-    focalLength: '',
-    shutterSpeed: '',
-  };
-  
-  imgPrc.getExifData(f, exifData, function(exifError) {
-    var baseName = path.basename(f);
-    emitNewFile(baseName, thumbName, hisName, exifData);
-  });
+  var baseName = path.basename(f);
+  emitNewFile(baseName, thumbName);
 }
 
 console.log("> HTTP server running on " + config.httpServerIP + ":" + config.httpServerPort);

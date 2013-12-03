@@ -22,6 +22,9 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
+    <Compile Include="routes\exif.js" />
+    <Compile Include="routes\histogram.js" />
+    <Compile Include="routes\index.js" />
     <Content Include="package.json" />
     <Content Include="public\javascripts\jquery-1.10.2.min.map" />
     <Content Include="README.md" />
@@ -34,17 +37,18 @@
     <Compile Include="public\javascripts\jquery-1.10.2.min.js" />
     <Compile Include="public\javascripts\jquery.fullscreen.js" />
     <Compile Include="public\javascripts\single.js" />
-    <Compile Include="routes.js" />
     <Content Include="views\single.jade" />
     <Content Include="public\css\single.css" />
     <Content Include="public\images\eyefi.gif" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
-    <Folder Include="public\css" />
+    <Folder Include="public\css\" />
+    <Folder Include="public\stylesheets\" />
     <Folder Include="public\eyefi\" />
     <Folder Include="public\images" />
     <Folder Include="public\javascripts\" />
+    <Folder Include="routes\" />
     <Folder Include="views" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />

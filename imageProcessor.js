@@ -212,5 +212,6 @@ function getExifData(f, result, callback)
 exports.getThumbName = getThumbName;
 exports.getThumbPath = getThumbPath;
 exports.getHisName = getHisName;
+exports.getHisPath = getHisPath;
 exports.getExifData = getExifData;
 exports.createHistogram = createHistogram;
