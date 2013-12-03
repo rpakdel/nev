@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{3736c8e2-c1de-4f8d-9612-ec2824eee9d5}</ProjectGuid>
     <ProjectHome />
-    <ProjectView>ProjectFiles</ProjectView>
+    <ProjectView>ShowAllFiles</ProjectView>
     <StartupFile>app.js</StartupFile>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -23,6 +23,7 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
   <ItemGroup>
     <Content Include="package.json" />
+    <Content Include="public\javascripts\jquery-1.10.2.min.map" />
     <Content Include="README.md" />
     <Compile Include="api.js" />
     <Compile Include="app.js" />
@@ -30,22 +31,20 @@
     <Compile Include="imageProcessor.js" />
     <Compile Include="images.js" />
     <Compile Include="mycards.js" />
+    <Compile Include="public\javascripts\jquery-1.10.2.min.js" />
+    <Compile Include="public\javascripts\jquery.fullscreen.js" />
+    <Compile Include="public\javascripts\single.js" />
     <Compile Include="routes.js" />
-    <Content Include="views\index.jade" />
-    <Content Include="views\photoswipe.jade" />
     <Content Include="views\single.jade" />
-    <Content Include="views\supersized.jade" />
     <Content Include="public\css\single.css" />
-    <Compile Include="public\fullscreen\jquery.fullscreen.js" />
-    <Compile Include="public\histogram-0.1.5\histogram.min.js" />
     <Content Include="public\images\eyefi.gif" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
     <Folder Include="public\css" />
-    <Folder Include="public\fullscreen" />
-    <Folder Include="public\histogram-0.1.5" />
+    <Folder Include="public\eyefi\" />
     <Folder Include="public\images" />
+    <Folder Include="public\javascripts\" />
     <Folder Include="views" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
