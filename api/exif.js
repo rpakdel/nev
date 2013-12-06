@@ -1,7 +1,7 @@
 ﻿var exif = require('exif2');
 var path = require('path');
 var config = require('../config.js');
-var imgPrc = require('../imageProcessor.js');
+var img = require('./img.js');
 
 function getExif(req, res)
 {
@@ -15,7 +15,7 @@ function getExif(req, res)
       shutterSpeed: '',
   };
   
-  imgPrc.getExifData(f, exifData, function(exifError) {
+  img.getExifData(f, exifData, function(exifError) {
     res.json(exifData);
   });
 }

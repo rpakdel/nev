@@ -1,17 +1,16 @@
 ﻿var path = require('path');
 var fs = require('fs');
 var config = require('../config.js');
-var imgPrc = require('../imageProcessor.js');
-
+var img = require('./img.js');
 
 function getHistogram(req, res)
 {
     var fileName = req.params.f
     var f = path.join(config.uploadDir, fileName);
 
-    var thumbPath = imgPrc.getThumbPath(f);
-    var hisName = imgPrc.getHisName(thumbPath);
-    var hisPath = imgPrc.getHisPath(thumbPath);
+    var thumbPath = img.getThumbPath(f);
+    var hisName = img.getHisName(thumbPath);
+    var hisPath = img.getHisPath(thumbPath);
 
     if (fs.exists(hisPath))
     {
@@ -19,7 +18,7 @@ function getHistogram(req, res)
     }
     else
     {
-        imgPrc.createHistogram(f, function(error) {      
+        img.createHistogram(f, function(error) {      
           if (error)
           {        
               res.json({ histogramName: '' });

@@ -76,18 +76,25 @@ function setExifInfo(exifData)
 
 function getExifInfo(fileName)
 {
-    $.get('exif/' + fileName, function(exifData) {
+    $.get('api/exif/' + fileName, function(exifData) {
         setExifInfo(exifData);
     });
 }
 
 function getHistogram(fileName)
 {
-    $.get('histogram/' + fileName, function(data) {
+    $.get('api/histogram/' + fileName, function(data) {
         loadHistogram(data.histogramName);
     });
 }
-      
+
+function checkQueue()
+{
+    $.get('api/queue', function(data) {
+        queueUpdated(data.length);
+    });
+}
+
 function setupSocket() 
 {
     var socket = io.connect('#{serverIp}');
@@ -113,4 +120,5 @@ function initializeSingle()
     loadHistogram('');
     updateProgressBar(0.0);
     attachFullScreenEvent();
+    setInterval(checkQueue, 3000);
 }

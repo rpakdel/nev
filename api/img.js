@@ -1,37 +1,109 @@
-﻿var path = require('path');
+var watch = require('watch');
+var path = require('path');
+var config = require('../config.js');
+var path = require('path');
 var exif = require('exif2');
 var exec = require('child_process').exec;
 var fs = require('fs');
 
-function prepareFile(filename) 
+var exampleFile = path.join(config.uploadDir, 'example.jpg');
+
+setInterval(function () {
+    require('./imgQ.js').push(exampleFile)
+    }, 4000);
+
+function startWatchingDir(newFileCallback, fileDeletedCallback, fileChangedCallback)
 {
-  createHistogram(path.join(config.uploadDir, filename), function(error) {
-    if (error)
+  var imagesDir = config.imagesDir;
+  var thumbsDir = config.thumbsDir;
+  console.log("Watching dir " + imagesDir); 
+  console.log("Thumbs will be created in " + thumbsDir);   
+  watch.watchTree(imagesDir, function(f, curr, prev) {
+    if (typeof f == "object" && prev === null && curr === null) 
     {
-      console.log('! No histogram created.');
+      // Finished walking the tree
+      console.log('Initial scan complete');
     }
-    else
+    else if (prev === null) 
     {
-      console.log('> Created thumbnail histogram for ' + filename);
+      // New file
+      if (path.extname(f) == ".jpg" || path.extname(f) == ".JPG")
+      {
+        console.log('New: ' + f);        
+        deleteThumb(f);        
+        createThumb(f);
+        if (newFileCallback)
+        {
+          newFileCallback(f);
+        }
+      }
+      else
+      {
+        console.log('Ignoring new file ' + f);
+      }
+    } 
+    else if (curr.nlink === 0) 
+    {
+      // file was removed
+      if (path.extname(f) == ".jpg" || path.extname(f) == ".JPG")
+      {
+        console.log('Removed: ' + f);        
+        deleteThumb(f);
+        if (fileDeletedCallback)
+        {
+         fileDeletedCallback(f);
+        }
+      }
+      else
+      {
+        console.log('Ignoring removed file ' + f);
+      }
+    } 
+    else 
+    {
+      // file was changed
+      if (path.extname(f) == ".jpg" || path.extname(f) == ".JPG")
+      {
+        console.log('Changed: ' + f);
+        deleteThumb(f);        
+        createThumb(f);
+        if (fileChangedCallback)
+        {
+          fileChangedCallback(f);
+        }
+      }
+      else
+      {
+        console.log('Ignoring changed file ' + f);
+      }
     }
-    queue.push(path.join(config.uploadDir, filename));
   });
 }
 
-function getHistogramData(f, histogramData)
+function getExistingImages(req, res)
 {
-  console.log("> Getting histogram data.");
-  histogram(f, function (err, data) {
-    if (err) 
+  fs.readdir(config.imagesDir, function(err, files) {
+    if (err)
     {
-      console.log(err);
+      console.log('err ' + err);
+      res.send(err);
     }
     else
-    {
-      console.log(f + ' has ' + data.colors.rgba + ' colors');
-      histogramData.red = data.red;
-      histogramData.green = data.green;
-      histogramData.blue = data.blue;
+    {      
+      var slides = [];
+      for(var i in files)
+      {        
+        var imagePath = '/images/' + files[i];
+        var thumbPath = '/thumbs/' + files[i];
+        var s = {
+          image: imagePath,
+          title: files[i],
+          thumb: thumbPath
+        };
+        slides.push(s);
+      }
+      console.log('sending ' + JSON.stringify(slides));
+      res.send(slides);
     }
   });
 }
@@ -209,9 +281,13 @@ function getExifData(f, result, callback)
   });
 }
 
+exports.exampleFile = exampleFile;
 exports.getThumbName = getThumbName;
 exports.getThumbPath = getThumbPath;
 exports.getHisName = getHisName;
 exports.getHisPath = getHisPath;
 exports.getExifData = getExifData;
 exports.createHistogram = createHistogram;
+
+exports.getExistingImages = getExistingImages;
+exports.startWatchingDir = startWatchingDir;
