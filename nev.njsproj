@@ -27,10 +27,12 @@
     <Compile Include="api\imgQ.js" />
     <Compile Include="api\exif.js" />
     <Compile Include="api\histogram.js" />
+    <Compile Include="public\JAVASC~1\jquery-ui-1.10.3.custom.js" />
     <Compile Include="routes\index.js" />
     <Compile Include="api\sock.js" />
     <Content Include="package.json" />
     <Content Include="public\javascripts\jquery-1.10.2.min.map" />
+    <Content Include="public\stylesheets\single.css" />
     <Content Include="README.md" />
     <Compile Include="app.js" />
     <Compile Include="config.js" />
@@ -40,13 +42,11 @@
     <Compile Include="public\javascripts\jquery.fullscreen.js" />
     <Compile Include="public\javascripts\single.js" />
     <Content Include="views\single.jade" />
-    <Content Include="public\css\single.css" />
     <Content Include="public\images\eyefi.gif" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="api\" />
     <Folder Include="public\" />
-    <Folder Include="public\css\" />
     <Folder Include="public\stylesheets\" />
     <Folder Include="public\eyefi\" />
     <Folder Include="public\images" />

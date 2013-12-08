@@ -19,16 +19,16 @@ function loadHistogram(hisImageName)
 
 function updateProgressBar(percent) 
 {
-if (percent == 0.0 || percent == 100.0)
-{
-    $('#progressBar').hide();
-}
-else
-{
-    var progressBarWidth = percent * $('#progressBar').width() / 100.0;
-    $('#progressBarDiv').animate({ width: progressBarWidth }, 100);
-    $('#progressBar').show();
-}
+    if (percent == 0.0 || percent == 100.0)
+    {
+        $('#progressBar').hide();
+    }
+    else
+    {
+        var progressBarWidth = percent * $(window).width() / 100.0;
+        $('#progressBar').animate({ width: progressBarWidth }, 250);
+        $('#progressBar').show();
+    }
 }
       
 function queueUpdated(qLength)
@@ -47,9 +47,9 @@ function attachFullScreenEvent()
 {
     if($.support.fullscreen) 
     {
-    $('#container').click(function(e) {
+      $('img#main').click(function() {
         $('#container').fullScreen();
-    });
+      });
     }
 }
 
@@ -113,12 +113,79 @@ function setupSocket()
     });
 }
 
+function setHistogramDraggable()
+{
+    $('img#his').draggable(
+        { 
+            containment: "window",
+            opacity: 0.4,
+            stop: onStopDragHistogram
+        });
+}
+
+function onStopDragHistogram(event, ui)
+{    
+    var position = ui.position;
+    localStorage.setItem('nev.histogram.position', JSON.stringify(position));
+}
+
+function loadHistogramPosition()
+{
+    var position = JSON.parse(localStorage.getItem('nev.histogram.position'));
+
+    if (position !== null)
+    {
+        var $imghis =  $('img#his');
+        var $win = $(window);
+
+        if ((position.left + $imghis.width()) > $win.width())
+        {
+            position.left = $win.width - $imghis.width();
+        }
+        if ((position.top + $imghis.height()) > $win.height())
+        {
+            position.top = $win.height() - $imghis.height();
+        }
+
+        $imghis.css({
+            left:position.left, 
+            top: position.top
+        });
+    }
+}
+
+function resetHistogramPosition()
+{
+  localStorage.removeItem('nev.histogram.position');
+  $('img#his').css({
+      right:'4px',
+      bottom:'4px'
+  });
+}
+
+function setupSettingsDialog()
+{
+    var $settingsDialog = $('#settingsDialog');
+    $settingsDialog.dialog({ autoOpen: false });
+    var $settingsButton = $('button#settingsButton');
+    $settingsButton.button(
+        {
+            icons: { primary: "ui-icon-gear", secondary: null },
+            text: false,
+        });
+    $settingsButton.on('click', function() {
+        $settingsDialog.dialog('open');
+    });
+}
+
 function initializeSingle()
 {
     setupSocket();
     loadImage('eyefi.gif');
     loadHistogram('');
-    updateProgressBar(0.0);
+    updateProgressBar(0);
     attachFullScreenEvent();
     setInterval(checkQueue, 3000);
+    setHistogramDraggable();
+    loadHistogramPosition();
 }
