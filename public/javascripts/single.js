@@ -6,6 +6,13 @@
       
 function loadHistogram(hisImageName)
 {
+    var hisVisibleStr = localStorage.getItem('nev.histogram.visible');
+    var hisVisible = true;
+    if (hisVisibleStr != null)
+    {
+        hisVisible = JSON.parse(hisVisibleStr);
+    }
+
     if (hisImageName == '')
     {
         $('#his').hide();
@@ -13,7 +20,15 @@ function loadHistogram(hisImageName)
     else
     {
         $('#his').attr('src', hisImageName).attr('alt', hisImageName);
-        $('#his').show();
+        if (hisVisible)
+        {
+            $('#his').show();
+            $('#toggleHisButton').css('background-color', 'rgba(255, 255, 255, 0.20)');
+        }
+        else
+        {
+            $('#toggleHisButton').css('background-color', 'rgba(0, 0, 0, 0.25)');
+        }
     }
 }
 
@@ -113,7 +128,7 @@ function setupSocket()
     });
 }
 
-function setHistogramDraggable()
+function setupHistogram()
 {
     $('img#his').draggable(
         { 
@@ -121,6 +136,32 @@ function setHistogramDraggable()
             opacity: 0.4,
             stop: onStopDragHistogram
         });
+    $('#resetHisButton').click(resetHistogramPosition);
+    $('#toggleHisButton').click(toggleHistogram);
+    loadHistogramPosition();
+}
+
+function toggleHistogram()
+{
+    var hisVisibleStr = localStorage.getItem('nev.histogram.visible');
+    var hisVisible = true;
+    if (hisVisibleStr != null)
+    {
+        hisVisible = JSON.parse(hisVisibleStr);
+    }
+
+    hisVisible = !hisVisible;
+    localStorage.setItem('nev.histogram.visible', hisVisible);
+    if (!hisVisible)
+    {
+        $('img#his').hide('slow');
+        $('#toggleHisButton').css('background-color', 'rgba(0, 0, 0, 0.25)');
+    }
+    else
+    {
+        $('img#his').show('slow');
+        $('#toggleHisButton').css('background-color', 'rgba(255, 255, 255, 0.20)');
+    }
 }
 
 function onStopDragHistogram(event, ui)
@@ -148,7 +189,7 @@ function loadHistogramPosition()
         }
 
         $imghis.css({
-            left:position.left, 
+            left: + position.left,
             top: position.top
         });
     }
@@ -163,29 +204,15 @@ function resetHistogramPosition()
   });
 }
 
-function setupSettingsDialog()
-{
-    var $settingsDialog = $('#settingsDialog');
-    $settingsDialog.dialog({ autoOpen: false });
-    var $settingsButton = $('button#settingsButton');
-    $settingsButton.button(
-        {
-            icons: { primary: "ui-icon-gear", secondary: null },
-            text: false,
-        });
-    $settingsButton.on('click', function() {
-        $settingsDialog.dialog('open');
-    });
-}
-
 function initializeSingle()
 {
+    //localStorage.removeItem('nev.histogram.visible');
     setupSocket();
     loadImage('eyefi.gif');
     loadHistogram('');
     updateProgressBar(0);
     attachFullScreenEvent();
     setInterval(checkQueue, 3000);
-    setHistogramDraggable();
-    loadHistogramPosition();
+    setupHistogram();
+    
 }
