@@ -21,11 +21,15 @@ html(lang="en")
       img#main(src='', alt='no image')
       #imageName imageName
       img#his(src='', alt='no histogram')
-      #exifInfo
-        #exifISO.exifBox ISO
-        #exifAperture.exifBox F
-        #exifShutterSpeed.exifBox S
-        #exifFocalLength.exifBox FL
-        #queueLength.exifBox Queue
-        #resetHisButton.exifBox His: R
-        #toggleHisButton.exifBox His: T
+      #rightContainer
+        #exifContainer
+          #exifISO.exifBox ISO
+          #exifAperture.exifBox F
+          #exifShutterSpeed.exifBox S
+          #exifFocalLength.exifBox FL
+        #buttonContainer
+          .nevButton#toggleHistogramButton
+            img#toggleHistogramImg.nevButtonContent(src='histogramButton.png', alt='toggle histogram', clickableButton='true')
+          .nevButton#resetHistogramButton
+            .exifBox Reset            
+          .exifBox#queueLen 0

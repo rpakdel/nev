@@ -3,32 +3,34 @@
     $('#main').attr('src', imageName).attr('alt', imageName);
     $('#imageName').text(imageName);
 }
-      
-function loadHistogram(hisImageName)
+
+function getIsHistogramEnabled()
 {
-    var hisVisibleStr = localStorage.getItem('nev.histogram.visible');
+    var hisVisibleStr = localStorage.getItem('nev.histogram.enable');
     var hisVisible = true;
     if (hisVisibleStr != null)
     {
         hisVisible = JSON.parse(hisVisibleStr);
     }
+    return hisVisible;
+}
 
-    if (hisImageName == '')
+function setIsHistogramEnabled(isEnabled)
+{
+    localStorage.setItem('nev.histogram.enable', isEnabled);
+}
+
+function displayHistogramImage(hisImageName)
+{
+    if (hisImageName == null || hisImageName == '')
     {
-        $('#his').hide();
+        showHideHistogram(false);
     }
     else
     {
+        var isEnabled = getIsHistogramEnabled();
         $('#his').attr('src', hisImageName).attr('alt', hisImageName);
-        if (hisVisible)
-        {
-            $('#his').show();
-            $('#toggleHisButton').css('background-color', 'rgba(255, 255, 255, 0.20)');
-        }
-        else
-        {
-            $('#toggleHisButton').css('background-color', 'rgba(0, 0, 0, 0.25)');
-        }
+        showHideHistogram(isEnabled);
     }
 }
 
@@ -48,14 +50,7 @@ function updateProgressBar(percent)
       
 function queueUpdated(qLength)
 {
-if (qLength == 0)
-{
-    $('#queueLength.exifBox').hide();
-}
-else
-{
-    $('#queueLength.exifBox').text('Queue: ' + qLength).show();
-}
+    $('#queueLen').text('Q:' + qLength);
 }
       
 function attachFullScreenEvent()
@@ -96,10 +91,17 @@ function getExifInfo(fileName)
     });
 }
 
+var histogramFileName = null;
 function getHistogram(fileName)
 {
+    histogramFileName = fileName;
+    if (!getIsHistogramEnabled())
+    {
+        return;
+    }    
+    displayHistogramImage('loading.png');
     $.get('api/histogram/' + fileName, function(data) {
-        loadHistogram(data.histogramName);
+        displayHistogramImage(data.histogramName);
     });
 }
 
@@ -136,31 +138,41 @@ function setupHistogram()
             opacity: 0.4,
             stop: onStopDragHistogram
         });
-    $('#resetHisButton').click(resetHistogramPosition);
-    $('#toggleHisButton').click(toggleHistogram);
+    $('#resetHistogramButton').click(resetHistogramPosition);
+    $('#toggleHistogramButton').click(toggleHistogram);
     loadHistogramPosition();
 }
 
 function toggleHistogram()
 {
-    var hisVisibleStr = localStorage.getItem('nev.histogram.visible');
-    var hisVisible = true;
-    if (hisVisibleStr != null)
+    var isEnabled = getIsHistogramEnabled();
+    isEnabled = !isEnabled;
+    setIsHistogramEnabled(isEnabled);
+    
+    if (isEnabled && histogramFileName != null)
     {
-        hisVisible = JSON.parse(hisVisibleStr);
-    }
-
-    hisVisible = !hisVisible;
-    localStorage.setItem('nev.histogram.visible', hisVisible);
-    if (!hisVisible)
-    {
-        $('img#his').hide('slow');
-        $('#toggleHisButton').css('background-color', 'rgba(0, 0, 0, 0.25)');
+      // load and show the image
+      getHistogram(histogramFileName);
     }
     else
     {
+        showHideHistogram(isEnabled);    
+    }    
+}
+
+function showHideHistogram(show)
+{
+    if (show)
+    {       
         $('img#his').show('slow');
-        $('#toggleHisButton').css('background-color', 'rgba(255, 255, 255, 0.20)');
+        $('#toggleHistogramImg').attr('buttonEnabled', true);
+        $('#resetHistogramButton').show();
+    }
+    else
+    {
+        $('img#his').hide('slow');
+        $('#toggleHistogramImg').attr('buttonEnabled', false);
+        $('#resetHistogramButton').hide();
     }
 }
 
@@ -209,7 +221,7 @@ function initializeSingle()
     //localStorage.removeItem('nev.histogram.visible');
     setupSocket();
     loadImage('eyefi.gif');
-    loadHistogram('');
+    displayHistogramImage(null);
     updateProgressBar(0);
     attachFullScreenEvent();
     setInterval(checkQueue, 3000);

@@ -11,7 +11,6 @@ body {
     right: 0px;
     top: 0px;
     bottom: 0px;
-    background-color: transparent;
     z-index: 0;
 }
 
@@ -27,19 +26,22 @@ body {
     z-index: 2;
 }
 
-#exifInfo {
+#rightContainer {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    z-index: 2;
+    font-family: Verdana;
     color: silver;
     text-align: center;
     text-shadow: 1px 1px black;
-    font-family: Verdana;
-    font-size: 10px;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 2;
-    margin-top: 2px;
-    margin-right: 2px;
+    vertical-align: middle;
+    align-content: center; 
+    padding: 4px 4px 4px 4px;
+}
+
+#exifContainer {
+    position: relative;    
 }
 
 .exifBox {
@@ -47,14 +49,17 @@ body {
     border-width: 1px;
     border-radius: 4px;
     border-style: solid;
-    padding: 1px;
+    padding-left: 1px;
+    padding-right: 1px;
     padding-top: 0px;
-    padding-bottom: 0px;
-    right: 2px;
-    margin: 1px;
+    padding-bottom: 0px;    
     border-color: rgba(255, 255, 255, 0.40);
-    z-index: 2;
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgba(0, 0, 0, 0.25);    
+    margin: 2px 2px 2px 2px;
+    text-align: center;
+    align-content: center;
+    vertical-align: middle;
+    font-size: 10px;
 }
 
 #progressBar {
@@ -71,8 +76,8 @@ img#main {
     width: 100%;
     overflow: hidden;
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0px;
+    left: 0px;
     z-index: 2;
 }
 
@@ -85,30 +90,64 @@ img#his {
     z-index: 2;
     opacity: 0.6;
     filter: alpha(opacity=60);
-    border-style: solid;
-    border-width: 3px;
-    border-radius: 6px;
-    border-color: rgba(255, 255, 255, 0.25);
-    
+    border-radius: 8px;
 }
 
-.hisButton {
-    position: absolute;
-    right: 2px;
-    border: 1px solid;
+#buttonContainer {
+    position: relative;
+    align-content: center;
+    margin-top: 16px;
+}
+
+.nevButton {
+    position: relative;    
+}
+
+.nevButtonContent {
+    position: relative;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.40);
     border-width: 1px;
     border-radius: 4px;
-    border-style: solid;
-    padding: 1px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    margin: 1px;
-    border-color: dimgrey;
-    z-index: 2;
-    color: silver;
+    width: 34px;
+    height: 34px;    
+    background-color: rgba(0, 0, 0, 0.10);
     text-align: center;
-    text-shadow: 1px 1px black;
-    font-family: Verdana;
-    font-size: 10px;
+    align-content: center;
+    vertical-align: middle;
+    margin: 2px 2px 2px 2px;
+    padding: 0px 0px 0px 0px;
+    display: inline-block;
+    opacity: 0.6;
 }
 
+[clickableButton=true]:hover {
+    border-color: rgba(255, 255, 255, 0.60);
+    background-color: rgba(255, 255, 255, 0.10);
+    opacity: 0.8;
+}
+
+.nevButtonText {
+    /*color: black;
+    text-shadow: 1px 1px silver;*/
+    font-size: small;
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    top: 11px;
+    bottom: 5px;
+    align-content: center;
+    text-align: center;
+    vertical-align: middle;
+    background: none;
+    display: table-cell;
+    pointer-events: none;
+}
+
+[buttonEnabled=true] {
+    border-color: rgb(81, 255, 0);    
+}
+
+[buttonEnabled=false] {
+    border-color: rgba(255, 255, 255, 0.40);
+}
