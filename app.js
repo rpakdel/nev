@@ -3,6 +3,7 @@ var app = express();
 var http = require('http');
 var routes = require('./routes/index.js');
 var config = require('./config.js');
+var img = require('./api/img.js');
 var imgQ = require('./api/imgQ.js');
 
 // create web server
@@ -36,9 +37,10 @@ app.configure('development', configureDev);
 app.get('/', routes.index);
 app.get('/single', routes.single);
 
-app.get('/api/images', require('./api/img.js').getExistingImages);
-app.get('/api/exif/:f', require('./api/exif.js').getExif);
-app.get('/api/histogram/:f', require('./api/histogram.js').getHistogram);
+app.get('/api/uploads', img.getExistingUploads);
+app.get('/api/exif/:f', img.getExif);
+app.get('/api/histogram/:f', img.getHistogram);
+app.get('/api/thumbnail/:f', img.getThumbnail);
 app.get('/api/queue', imgQ.getQueueSize);
 
 console.log("> HTTP server running on " + config.httpServerIP + ":" + config.httpServerPort);

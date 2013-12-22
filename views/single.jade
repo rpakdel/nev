@@ -17,6 +17,7 @@ html(lang="en")
 
   body    
     #progressBar
+    #timerBar
     #container
       img#main(src='', alt='no image')
       #imageName imageName
@@ -28,8 +29,16 @@ html(lang="en")
           #exifShutterSpeed.exifBox S
           #exifFocalLength.exifBox FL
         #buttonContainer
+          .nevButton#toggleAutoplayButton
+            img#toggleAutoplayImg.nevButtonContent(src='pause.png', alt='pause', clickableButton='true')
           .nevButton#toggleHistogramButton
             img#toggleHistogramImg.nevButtonContent(src='histogramButton.png', alt='toggle histogram', clickableButton='true')
           .nevButton#resetHistogramButton
-            .exifBox Reset            
+            .exifBox Reset
           .exifBox#queueLen 0
+      #thumbnailContainer
+        img.thumbnail(src='example_THUMB.jpg', alt='example_THUMB.jpg', imageName='example.jpg')
+        img.thumbnail(src='example2_THUMB.jpg', alt='example2_THUMB.jpg', imageName='example2.jpg')
+        img.thumbnail(src='example3_THUMB.gif', alt='example3_THUMB.gif', imageName='example3.gif')
+        img.thumbnail(src='example4_THUMB.jpg', alt='example4_THUMB.jpg', imageName='example4.jpg')
+        img.thumbnail(src='DSC_2750_DxO_g.jpg', alt='DSC_2750_DxO_g.jpg', imageName='DSC_2750_DxO_g.jpg')

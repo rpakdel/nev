@@ -65,20 +65,29 @@ body {
 #progressBar {
     width: 100%;
     height: 2px;
-    background-color: #0099ff;
+    background-color: rgba(0, 153, 255, 0.75);
     position: absolute;
     top: 0;
     left: 0;
     z-index: 2;
 }
 
+#timerBar {
+    width: 100%;
+    height: 2px;
+    background-color: rgba(0, 255, 13, 0.75);
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    z-index: 2;
+}
+
 img#main {
     width: 100%;
     overflow: hidden;
-    position: absolute;
-    top: 0px;
-    left: 0px;
     z-index: 2;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 img#his {
@@ -119,12 +128,14 @@ img#his {
     padding: 0px 0px 0px 0px;
     display: inline-block;
     opacity: 0.6;
+    filter: alpha(opacity=60);
 }
 
 [clickableButton=true]:hover {
     border-color: rgba(255, 255, 255, 0.60);
     background-color: rgba(255, 255, 255, 0.10);
     opacity: 0.8;
+    filter: alpha(opacity=80);
 }
 
 .nevButtonText {
@@ -150,4 +161,20 @@ img#his {
 
 [buttonEnabled=false] {
     border-color: rgba(255, 255, 255, 0.40);
+}
+
+#thumbnailContainer {
+    position: absolute;
+    bottom: 0px;
+    opacity: 0.9;
+    filter: alpha(opacity=90);
+    z-index: 4;
+    width: 100%;
+    height: 65px;  
+}
+
+.thumbnail {
+    height: 64px;    
+    border-top: solid silver 1px;
+    border-right: solid silver 1px;
 }

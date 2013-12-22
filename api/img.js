@@ -80,9 +80,9 @@ function startWatchingDir(newFileCallback, fileDeletedCallback, fileChangedCallb
   });
 }
 
-function getExistingImages(req, res)
+function getExistingUploads(req, res)
 {
-  fs.readdir(config.imagesDir, function(err, files) {
+  fs.readdir(config.uploadDir, function(err, files) {
     if (err)
     {
       console.log('err ' + err);
@@ -90,20 +90,24 @@ function getExistingImages(req, res)
     }
     else
     {      
-      var slides = [];
+      var uploads = [];
       for(var i in files)
       {        
-        var imagePath = '/images/' + files[i];
-        var thumbPath = '/thumbs/' + files[i];
-        var s = {
-          image: imagePath,
-          title: files[i],
-          thumb: thumbPath
-        };
-        slides.push(s);
+        var imageName = files[i];
+        if (imageName.indexOf('_THUMB') == -1 &&
+            imageName.indexOf('_HIS') == -1)
+        {
+          var stats = fs.statSync(path.join(config.uploadDir, imageName));
+          // use same JSON as onNewFile()
+          var s = {
+            fileName: imageName,
+            mtime: stats.mtime,
+          };
+          uploads.push(s);
+        }
       }
-      console.log('sending ' + JSON.stringify(slides));
-      res.send(slides);
+      console.log('sending ' + JSON.stringify(uploads));
+      res.json(uploads);
     }
   });
 }
@@ -281,6 +285,92 @@ function getExifData(f, result, callback)
   });
 }
 
+function getHistogram(req, res)
+{
+    var fileName = req.params.f
+    var f = path.join(config.uploadDir, fileName);
+
+    var thumbPath = getThumbPath(f);
+    var hisName = getHisName(thumbPath);
+    var hisPath = getHisPath(thumbPath);
+
+    if (fs.exists(hisPath))
+    {
+        res.json({ histogramName: hisName });
+    }
+    else
+    {
+        createHistogram(f, function(error) {
+            if (error)
+            {        
+                res.json({ histogramName: '' });
+            }
+            else
+            {          
+                res.json({ histogramName: hisName });
+            }      
+        });
+    }
+}
+
+function getThumbnail(req, res)
+{
+    var fileName = req.params.f
+    var f = path.join(config.uploadDir, fileName);
+
+    var thumbName = getThumbName(f);
+    var thumbPath = getThumbPath(f);
+
+    if (fs.exists(thumbPath))
+    {
+        res.json({ 
+            thumbName: thumbName,
+            generated: false,
+            existing: true,
+          });
+    }
+    else
+    {
+        createThumbnail(f, function(error) {
+            if (error)
+            {        
+                res.json({ 
+                    thumbName: '',
+                    generated: false,
+                    existing: false,
+                  });
+            }
+            else
+            {          
+                res.json({ 
+                    thumbName: thumbName,
+                    generated: true,
+                    existing: false 
+                  });
+            }      
+        });
+    }
+}
+
+function getExif(req, res)
+{
+    var fileName = req.params.f
+    var f = path.join(config.uploadDir, fileName);
+
+    var exifData = {
+      iso: '',
+      aperture: '',
+      focalLength: '',
+      shutterSpeed: '',
+  };
+  
+  getExifData(f, exifData, function(exifError) {
+    res.json(exifData);
+  });
+}
+
+
+
 exports.exampleFile = exampleFile;
 exports.getThumbName = getThumbName;
 exports.getThumbPath = getThumbPath;
@@ -289,5 +379,8 @@ exports.getHisPath = getHisPath;
 exports.getExifData = getExifData;
 exports.createHistogram = createHistogram;
 
-exports.getExistingImages = getExistingImages;
-exports.startWatchingDir = startWatchingDir;
+// web-api
+exports.getHistogram = getHistogram;
+exports.getThumbnail = getThumbnail;
+exports.getExistingUploads = getExistingUploads;
+exports.getExif = getExif;

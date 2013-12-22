@@ -1,7 +1,18 @@
-﻿function loadImage(imageName)
+﻿var playbackState = "play";
+var timer = 5000;
+
+function loadImage(imageName)
 {
-    $('#main').attr('src', imageName).attr('alt', imageName);
+    var $mainImage = $('img#main');    
+    $mainImage.attr('src', imageName).attr('alt', imageName);
     $('#imageName').text(imageName);
+}
+
+function displayImageAndComponents(imageName)
+{
+  loadImage(imageName);
+  getExifInfo(imageName);
+  getHistogram(imageName);
 }
 
 function getIsHistogramEnabled()
@@ -47,7 +58,24 @@ function updateProgressBar(percent)
         $('#progressBar').show();
     }
 }
-      
+
+function timerDecrement()
+{
+    if (playbackState == 'pause')
+    {
+        return;
+    }
+
+    timer = timer - 510;
+    if (timer < 0)
+    {
+        timer = 0;
+    }
+    var percent = timer * 100.0/ 5000.0;
+    var timerBarWidth = percent * $(window).width() / 100.0;
+    $('#timerBar').animate({ width: timerBarWidth }, 250);
+}
+
 function queueUpdated(qLength)
 {
     $('#queueLen').text('Q:' + qLength);
@@ -101,7 +129,7 @@ function getHistogram(fileName)
     }    
     displayHistogramImage('loading.png');
     $.get('api/histogram/' + fileName, function(data) {
-        displayHistogramImage(data.histogramName);
+        displayHistogramImage(data.histogramName);        
     });
 }
 
@@ -112,13 +140,26 @@ function checkQueue()
     });
 }
 
+function addImageThumbnail(imageName)
+{
+    $.get('api/thumbnail/' + imageName, function(data) {
+        var $thumbnailContainer = $('#thumbnailContainer');
+        var $img = $('<img></img>').attr('src', data.thumbName).attr('alt', data.thumbName).attr('imageName', imageName).addClass('thumbnail');
+        $img.click(thumbnailOnClick);
+        $thumbnailContainer.append($img);
+      });
+}
+
 function setupSocket() 
 {
     var socket = io.connect('#{serverIp}');
     socket.on('newFile', function(data) {
-        loadImage(data.fileName);
-        getExifInfo(data.fileName);
-        getHistogram(data.fileName);
+      if (playbackState != "pause")
+      {
+          displayImageAndComponents(data.fileName);
+      }
+      timer = 5000;
+      addImageThumbnail(data.fileName);      
     });
 
     socket.on('uploadingImage', function(data) {
@@ -216,6 +257,51 @@ function resetHistogramPosition()
   });
 }
 
+function thumbnailOnClick(eventObject)
+{
+    playbackState = "pause";
+    showPlaybackButton();
+    var imageName = eventObject.target.attributes.imageName.value;
+    displayImageAndComponents(imageName);
+}
+
+function setupThumbnails()
+{
+    $('#thumbnailContainer > img').on('click', thumbnailOnClick);
+}
+
+function showPlaybackButton()
+{
+    if (playbackState == 'play')
+    {
+        $('#timerBar').show();
+        $('img#toggleAutoplayImg').attr('src', 'pause.png').attr('alt', 'pause');
+    }
+    else
+    {
+        $('#timerBar').hide();
+        $('img#toggleAutoplayImg').attr('src', 'play.png').attr('alt', 'play');
+    }
+}
+
+function toggleAutoplay()
+{
+    if (playbackState == 'play')
+    {
+        playbackState = 'pause';
+    }
+    else
+    {
+        playbackState = 'play';
+    }
+    showPlaybackButton();
+}
+
+function setupAutoplay()
+{
+    $('#toggleAutoplayButton').click(toggleAutoplay);
+}
+
 function initializeSingle()
 {
     //localStorage.removeItem('nev.histogram.visible');
@@ -225,6 +311,8 @@ function initializeSingle()
     updateProgressBar(0);
     attachFullScreenEvent();
     setInterval(checkQueue, 3000);
+    setInterval(timerDecrement, 260);
+    setupAutoplay();
     setupHistogram();
-    
+    setupThumbnails();
 }

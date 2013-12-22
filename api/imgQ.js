@@ -27,9 +27,8 @@ function push(item)
 
 function onNewFile(f) 
 {  
-  var thumbName = img.getThumbName(f);    
   var baseName = path.basename(f);
-  sock.emitNewFile(baseName, thumbName);
+  sock.emitNewFile(baseName);
 }
 
 function getQueueSize(req, res)

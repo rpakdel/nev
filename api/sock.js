@@ -27,11 +27,10 @@ function on(event, callback)
     io.sockets.on(event, callback);
 }
 
-function emitNewFile(baseName, thumbName)
+function emitNewFile(baseName)
 {
   io.sockets.emit('newFile', { 
-    fileName: baseName, 
-    thumbName: thumbName
+    fileName: baseName
   });
 }
 
