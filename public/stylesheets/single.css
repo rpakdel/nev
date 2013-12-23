@@ -102,6 +102,21 @@ img#his {
     border-radius: 8px;
 }
 
+img#loading {
+    width: 160px;
+    height: 24px;
+    position: absolute;
+    margin-left: -80px;
+    margin-right: auto;
+    margin-top: -12px;
+    margin-bottom: auto;
+    z-index: 5;
+    left: 50%;
+    top: 50%;
+    opacity: 0.6;
+    filter: alpha(opacity=60);
+}
+
 #buttonContainer {
     position: relative;
     align-content: center;

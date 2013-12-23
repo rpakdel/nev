@@ -1,11 +1,22 @@
-﻿var playbackState = "play";
-var timer = 5000;
+﻿var playbackState = 'play';
+var checkQueueTimeout = 4000;
+var serverQueueTimeout = 5000;
 
 function loadImage(imageName)
 {
-    var $mainImage = $('img#main');    
-    $mainImage.attr('src', imageName).attr('alt', imageName);
+    $('img#loading').show();
     $('#imageName').text(imageName);
+    var $mainImage = $('img#main');
+    var img = new Image();
+    img.src = imageName;
+    img.onload = function() {
+      $mainImage.attr('src', imageName).attr('alt', imageName);
+      $('img#loading').hide();
+      if (playbackState == 'play')
+      {
+          setTimeout(checkQueue, checkQueueTimeout);
+      }
+    }
 }
 
 function displayImageAndComponents(imageName)
@@ -66,12 +77,12 @@ function timerDecrement()
         return;
     }
 
-    timer = timer - 510;
-    if (timer < 0)
+    serverQueueTimeout = serverQueueTimeout - 510;
+    if (serverQueueTimeout < 0)
     {
-        timer = 0;
+        serverQueueTimeout = 0;
     }
-    var percent = timer * 100.0/ 5000.0;
+    var percent = serverQueueTimeout * 100.0/ 5000.0;
     var timerBarWidth = percent * $(window).width() / 100.0;
     $('#timerBar').animate({ width: timerBarWidth }, 250);
 }
@@ -127,7 +138,7 @@ function getHistogram(fileName)
     {
         return;
     }    
-    displayHistogramImage('loading.png');
+    displayHistogramImage('histogram-loading.gif');
     $.get('api/histogram/' + fileName, function(data) {
         displayHistogramImage(data.histogramName);        
     });
@@ -158,7 +169,8 @@ function setupSocket()
       {
           displayImageAndComponents(data.fileName);
       }
-      timer = 5000;
+      // next notification is in 5s
+      serverQueueTimeout = 5000;
       addImageThumbnail(data.fileName);      
     });
 
@@ -293,6 +305,7 @@ function toggleAutoplay()
     else
     {
         playbackState = 'play';
+        checkQueue();
     }
     showPlaybackButton();
 }
@@ -310,7 +323,6 @@ function initializeSingle()
     displayHistogramImage(null);
     updateProgressBar(0);
     attachFullScreenEvent();
-    setInterval(checkQueue, 3000);
     setInterval(timerDecrement, 260);
     setupAutoplay();
     setupHistogram();
