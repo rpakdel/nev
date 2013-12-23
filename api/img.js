@@ -6,11 +6,27 @@ var exif = require('exif2');
 var exec = require('child_process').exec;
 var fs = require('fs');
 
+var exampleIndex = 0;
 var exampleFile = path.join(config.uploadDir, 'example.jpg');
+var exampleFiles = [
+  path.join(config.uploadDir, 'example.jpg'),
+  path.join(config.uploadDir, 'example1.jpg'),
+  path.join(config.uploadDir, 'example2.gif'),
+  path.join(config.uploadDir, 'example3.jpg'),
+  path.join(config.uploadDir, 'example4.jpg') ];
 
-setInterval(function () {
-    require('./imgQ.js').push(exampleFile)
+function enableDebugQueue()
+{
+  console.log('Queueing example images every 4000ms.');
+  setInterval(function () {
+    require('./imgQ.js').push(exampleFiles[exampleIndex])
     }, 4000);
+    exampleIndex++;
+    if (exampleIndex > 4) 
+    { 
+      exampleIndex = 0; 
+    }
+}
 
 function startWatchingDir(newFileCallback, fileDeletedCallback, fileChangedCallback)
 {
@@ -378,6 +394,8 @@ exports.getHisName = getHisName;
 exports.getHisPath = getHisPath;
 exports.getExifData = getExifData;
 exports.createHistogram = createHistogram;
+
+exports.enableDebugQueue = enableDebugQueue;
 
 // web-api
 exports.getHistogram = getHistogram;

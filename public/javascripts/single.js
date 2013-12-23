@@ -135,7 +135,7 @@ function getHistogram(fileName)
 
 function checkQueue()
 {
-    $.get('api/queue', function(data) {
+    $.get('api/queuesize', function(data) {
         queueUpdated(data.length);
     });
 }

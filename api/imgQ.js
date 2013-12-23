@@ -36,6 +36,12 @@ function getQueueSize(req, res)
     res.json({ length: queue.length });
 }
 
+function getQueue(req, res)
+{
+  res.json({ queue: queue });
+}
+
 exports.setup = setup;
 exports.getQueueSize = getQueueSize;
+exports.getQueue = getQueue;
 exports.push = push;
