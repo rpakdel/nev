@@ -13,13 +13,14 @@ var exampleFiles = [
   path.join(config.uploadDir, 'example1.jpg'),
   path.join(config.uploadDir, 'example2.jpg'),
   path.join(config.uploadDir, 'example3.jpg'),
-  path.join(config.uploadDir, 'example4.jpg') ];
+  path.join(config.uploadDir, 'example4.jpg'),
+  path.join(config.uploadDir, 'example5.jpg') ];
 
 function queueNextExample()
 {
     require('./imgQ.js').push(exampleFiles[exampleIndex]);
     exampleIndex++;
-    if (exampleIndex > 4) 
+    if (exampleIndex >= exampleFiles.length) 
     { 
       exampleIndex = 0; 
     }
@@ -231,12 +232,12 @@ function createThumbHistogram(thumbPath, callback)
     'gm convert ' + miffPath + ' ' + hisPath;
   var child = exec(hisCommand, function (error, stdout, stderr) {
     console.log(' Histogram process stdout: ' + stdout);
+    if (fs.existsSync(miffPath))
+    {
+      fs.unlinkSync(miffPath);
+    }
     if (error !== null) 
     {
-      if (fs.exists(miffPath))
-      {
-        fs.unlinkSync(miffPath);
-      }
       console.log('! Histogram process exec error: ' + error);
       console.log('! Histogram process stderr: ' + stderr);
       callback(error);
@@ -313,12 +314,13 @@ function getHistogram(req, res)
     var hisName = getHisName(thumbPath);
     var hisPath = getHisPath(thumbPath);
 
-    if (fs.exists(hisPath))
-    {
+    fs.exists(hisPath, function(exists) {
+      if (exists)
+      {
         res.json({ histogramName: hisName });
-    }
-    else
-    {
+      }
+      else
+      {
         createHistogram(f, function(error) {
             if (error)
             {        
@@ -329,7 +331,9 @@ function getHistogram(req, res)
                 res.json({ histogramName: hisName });
             }      
         });
-    }
+      }
+    });
+    
 }
 
 function getThumbnail(req, res)
@@ -340,35 +344,37 @@ function getThumbnail(req, res)
     var thumbName = getThumbName(f);
     var thumbPath = getThumbPath(f);
 
-    if (fs.exists(thumbPath))
-    {
+    fs.exists(thumbPath, function(exists) {
+      if (exists)
+      {
         res.json({ 
             thumbName: thumbName,
             generated: false,
             existing: true
           });
-    }
-    else
-    {
+      }
+      else
+      {
         createThumbnail(f, function(error) {
-            if (error)
-            {        
-                res.json({ 
-                    thumbName: '',
-                    generated: false,
-                    existing: false
-                  });
-            }
-            else
-            {          
-                res.json({ 
-                    thumbName: thumbName,
-                    generated: true,
-                    existing: false 
-                  });
-            }      
+          if (error)
+          {        
+              res.json({ 
+                  thumbName: '',
+                  generated: false,
+                  existing: false
+                });
+          }
+          else
+          {          
+              res.json({ 
+                  thumbName: thumbName,
+                  generated: true,
+                  existing: false 
+                });
+          }
         });
-    }
+      }
+    });
 }
 
 function getExif(req, res)
