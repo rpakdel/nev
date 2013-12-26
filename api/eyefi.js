@@ -1,4 +1,4 @@
-﻿var eyefi = require('eyefi');
+var eyefi = require('eyefi');
 var imgQ = require('./imgQ.js');
 var sock = require('./sock.js');
 var config = require('../config.js');

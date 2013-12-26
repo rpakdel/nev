@@ -1,4 +1,4 @@
-﻿var playbackState = 'play';
+var playbackState = 'play';
 var checkQueueTimeout = 4000;
 var serverQueueTimeout = 5000;
 
@@ -16,7 +16,7 @@ function loadImage(imageName)
       {
           setTimeout(checkQueue, checkQueueTimeout);
       }
-    }
+    };
 }
 
 function displayImageAndComponents(imageName)
@@ -30,7 +30,7 @@ function getIsHistogramEnabled()
 {
     var hisVisibleStr = localStorage.getItem('nev.histogram.enable');
     var hisVisible = true;
-    if (hisVisibleStr != null)
+    if (hisVisibleStr !== null)
     {
         hisVisible = JSON.parse(hisVisibleStr);
     }
@@ -44,7 +44,7 @@ function setIsHistogramEnabled(isEnabled)
 
 function displayHistogramImage(hisImageName)
 {
-    if (hisImageName == null || hisImageName == '')
+    if (hisImageName === null || hisImageName === '')
     {
         showHideHistogram(false);
     }
@@ -58,7 +58,7 @@ function displayHistogramImage(hisImageName)
 
 function updateProgressBar(percent) 
 {
-    if (percent == 0.0 || percent == 100.0)
+    if (percent === 0.0 || percent === 100.0)
     {
         $('#progressBar').hide();
     }
@@ -104,15 +104,15 @@ function attachFullScreenEvent()
 
 function setElementExifData(element, data, pre, post)
 {
-if (data)
-{
-    element.text(pre + data + post);
-    element.show();
-}
-else
-{
-    element.hide();
-}
+	if (data)
+	{
+		element.text(pre + data + post);
+		element.show();
+	}
+	else
+	{
+		element.hide();
+	}
 }
       
 function setExifInfo(exifData)
@@ -202,7 +202,7 @@ function toggleHistogram()
     isEnabled = !isEnabled;
     setIsHistogramEnabled(isEnabled);
     
-    if (isEnabled && histogramFileName != null)
+    if (isEnabled && histogramFileName !== null)
     {
       // load and show the image
       getHistogram(histogramFileName);

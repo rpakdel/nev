@@ -1,4 +1,4 @@
-﻿var img = require('./img.js');
+var img = require('./img.js');
 var imgQ = require('./imgQ.js');
 
 var io = null;

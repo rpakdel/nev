@@ -1,4 +1,4 @@
-﻿var sock = require('./sock.js');
+var sock = require('./sock.js');
 var img = require('./img.js');
 var path = require('path');
 
@@ -6,7 +6,7 @@ var queue = [];
 
 function check()
 {
-  if (queue.length == 0)
+  if (queue.length === 0)
   {
     return;
   }

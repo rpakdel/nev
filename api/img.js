@@ -120,7 +120,7 @@ function getExistingUploads(req, res)
           // use same JSON as onNewFile()
           var s = {
             fileName: imageName,
-            mtime: stats.mtime,
+            mtime: stats.mtime
           };
           uploads.push(s);
         }
@@ -306,7 +306,7 @@ function getExifData(f, result, callback)
 
 function getHistogram(req, res)
 {
-    var fileName = req.params.f
+    var fileName = req.params.f;
     var f = path.join(config.uploadDir, fileName);
 
     var thumbPath = getThumbPath(f);
@@ -334,7 +334,7 @@ function getHistogram(req, res)
 
 function getThumbnail(req, res)
 {
-    var fileName = req.params.f
+    var fileName = req.params.f;
     var f = path.join(config.uploadDir, fileName);
 
     var thumbName = getThumbName(f);
@@ -345,7 +345,7 @@ function getThumbnail(req, res)
         res.json({ 
             thumbName: thumbName,
             generated: false,
-            existing: true,
+            existing: true
           });
     }
     else
@@ -356,7 +356,7 @@ function getThumbnail(req, res)
                 res.json({ 
                     thumbName: '',
                     generated: false,
-                    existing: false,
+                    existing: false
                   });
             }
             else
@@ -373,14 +373,14 @@ function getThumbnail(req, res)
 
 function getExif(req, res)
 {
-    var fileName = req.params.f
+    var fileName = req.params.f;
     var f = path.join(config.uploadDir, fileName);
 
     var exifData = {
       iso: '',
       aperture: '',
       focalLength: '',
-      shutterSpeed: '',
+      shutterSpeed: ''
   };
   
   getExifData(f, exifData, function(exifError) {
