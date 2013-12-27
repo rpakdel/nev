@@ -2,21 +2,32 @@ var playbackState = 'play';
 var checkQueueTimeout = 4000;
 var serverQueueTimeout = 5000;
 
+var shouldShowLoadingImage = false;
 function loadImage(imageName)
 {
+  shouldShowLoadingImage = true;
+  setTimeout(showLoadingImage, 500);
+  $('#imageName').text(imageName);
+  var $mainImage = $('img#main');
+  var img = new Image();
+  img.src = imageName;
+  img.onload = function() {
+    $mainImage.attr('src', imageName).attr('alt', imageName);
+    shouldShowLoadingImage = false;
+    $('img#loading').hide();
+    if (playbackState == 'play')
+    {
+        setTimeout(checkQueue, checkQueueTimeout);
+    }
+  };
+}
+
+function showLoadingImage()
+{
+  if (shouldShowLoadingImage)
+  {
     $('img#loading').show();
-    $('#imageName').text(imageName);
-    var $mainImage = $('img#main');
-    var img = new Image();
-    img.src = imageName;
-    img.onload = function() {
-      $mainImage.attr('src', imageName).attr('alt', imageName);
-      $('img#loading').hide();
-      if (playbackState == 'play')
-      {
-          setTimeout(checkQueue, checkQueueTimeout);
-      }
-    };
+  }
 }
 
 function displayImageAndComponents(imageName)
@@ -155,9 +166,25 @@ function addImageThumbnail(imageName)
 {
     $.get('api/thumbnail/' + imageName, function(data) {
         var $thumbnailContainer = $('#thumbnailContainer');
-        var $img = $('<img></img>').attr('src', data.thumbName).attr('alt', data.thumbName).attr('imageName', imageName).addClass('thumbnail');
-        $img.click(thumbnailOnClick);
-        $thumbnailContainer.append($img);
+        var newImage = new Image();
+        newImage.src = data.thumbName;
+        newImage.onload = function() {
+          var $img = $('<img></img>').attr('src', data.thumbName).attr('alt', data.thumbName).attr('imageName', imageName).addClass('thumbnail').hide();
+          $img.click(thumbnailOnClick);
+          var newImageRatio = 64.0 / newImage.height; // thumbnails is 64 pixel high
+          var newIamgeWidth = newImageRatio * newImage.width;
+          if (($thumbnailContainer.width() + newIamgeWidth) > $(window).width())
+          {
+            var $firstChild = $thumbnailContainer.children().first();
+            var firstChildWidth = $firstChild.width(); 
+            $thumbnailContainer.animate({ 'margin-left': -firstChildWidth }, 1000, function() {
+                $firstChild.remove();
+                $thumbnailContainer.css({ 'margin-left': 0 });
+            });
+          }
+          $thumbnailContainer.append($img);
+          $img.fadeIn(1000);
+        };
       });
 }
 
