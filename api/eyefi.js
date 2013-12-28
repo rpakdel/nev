@@ -3,9 +3,11 @@ var imgQ = require('./imgQ.js');
 var sock = require('./sock.js');
 var config = require('../config.js');
 var mycards = require('../mycards.js');
+var path = require('path');
 
 function setup()
 {
+  console.log('> Initializing Eye-Fi server');
   // create eye-fi server
   var eyefiServer = eyefi(
   {

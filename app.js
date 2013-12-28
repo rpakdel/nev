@@ -44,6 +44,6 @@ app.get('/api/thumbnail/:f', img.getThumbnail);
 app.get('/api/queuesize', imgQ.getQueueSize);
 app.get('/api/queue', imgQ.getQueue);
 
-img.enableDebugQueue();
+//img.enableDebugQueue();
 console.log("> HTTP server running on " + config.httpServerIP + ":" + config.httpServerPort);
 httpServer.listen(config.httpServerPort);

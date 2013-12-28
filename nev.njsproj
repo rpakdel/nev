@@ -17,7 +17,7 @@
     <ScriptArguments />
     <NodejsPort>8080</NodejsPort>
     <StartWebBrowser>True</StartWebBrowser>
-    <LaunchUrl>diamond:8080</LaunchUrl>
+    <LaunchUrl>localhost:8080</LaunchUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
