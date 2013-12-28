@@ -9,7 +9,6 @@ function setup(httpServer)
 
   io.sockets.on('connection', function(client) {
     console.log('> Client ' + client.id + ' connected.');
-    imgQ.push(img.exampleFile);
   });
 
   io.sockets.on('disconnect', function(client) {
