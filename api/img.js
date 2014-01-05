@@ -5,6 +5,7 @@ var path = require('path');
 var exif = require('exif2');
 var exec = require('child_process').exec;
 var fs = require('fs');
+var gm = require('gm');
 
 var exampleIndex = 0;
 var exampleFile = path.join(config.uploadDir, 'example.jpg');
@@ -132,6 +133,23 @@ function getExistingUploads(req, res)
   });
 }
 
+function getSizeName(f, size)
+{
+  var extname = path.extname(f);
+  var filename = path.basename(f, extname);
+  var sizeName = filename + '_' + size + extname;
+  return sizeName;
+}
+
+function getSizePath(f, size)
+{
+  var dirname = path.dirname(f);
+  var sizeName = getSizeName(f, size);
+  var sizePath = path.join(dirname, sizeName);
+  return sizePath;
+}
+
+
 function getThumbName(f)
 {
   var extname = path.extname(f);
@@ -178,6 +196,48 @@ function getMiffPath(f)
   var miffName = getMiffName(f);
   var miffPath = path.join(dirname, miffName);
   return miffPath;  
+}
+
+function createResizedImage(f, size, callback)
+{
+  var sizeName = getSizeName(f, size);
+  var sizePath = getSizePath(f, size);
+
+  console.log('> Creating resized image ' + sizeName);
+  var resizeCommand =
+    'gm convert -size ' + size + 'x' + size + ' ' + f +
+    ' -resize ' + size + 'x' + size + ' ' + sizePath;
+    
+  var resizeChildProcess = exec(resizeCommand, function (error, stdout, stderr) {    
+    console.log('> Resize process stdout: ' + stdout);
+    if (error !== null) 
+    {
+      console.log('! Resize process exec error: ' + error);
+      console.log('! Resize process stderr: ' + stderr);
+      callback(error);
+    }
+    else
+    {
+      callback(null);
+    }
+  });
+}
+
+function createResizedImageIfNotExisting(f, size, callback)
+{
+  var sizeName = getSizeName(f, size);
+  var sizePath = getSizePath(f, size);
+
+  fs.exists(sizePath, function(exists) {
+    if (exists)
+    {
+      callback(null);
+    }
+    else
+    {
+      createResizedImage(f, size, callback);
+    }
+  });
 }
 
 function createThumbnail(f, callback)
@@ -350,7 +410,8 @@ function getThumbnail(req, res)
         res.json({ 
             thumbName: thumbName,
             generated: false,
-            existing: true
+            existing: true,
+            generating: true
           });
       }
       else
@@ -394,6 +455,79 @@ function getExif(req, res)
   });
 }
 
+function getViewerWidthOptimizedWidth(req, res)
+{
+  var fileName = req.params.f;
+  var f = path.join(config.uploadDir, fileName);
+
+  var screenW = parseInt(req.params.w);
+  var screenH = parseInt(req.params.h);
+
+  gm(f).size(function (err, size) {
+    var result = {
+      screenWidth: screenW,
+      screenHeight: screenH,
+      resize: false, 
+      newWidth: -1,
+      newHeight: -1
+    };
+    if (!err)
+    {
+      result.imageWidth = size.width;
+      result.imageHeight = size.height;
+      var ratio = size.height/size.width;
+      // no need to resize if image is narrower than screen width
+      if (size.width > screenW)
+      {
+        if (screenW <= 512)
+        {
+          result.resize = true;
+          result.newWidth = Math.min(512, size.width);
+          result.newHeight = Math.round(ratio * result.newWidth);
+        }
+        else if (screenW <= 1024)
+        {
+          result.resize = true;
+          result.newWidth = Math.min(1024, size.width);
+          result.newHeight = Math.round(ratio * result.newWidth);
+        }
+        else if (screenW <= 2048 && size.width > 2048)
+        {
+           result.resize = true;
+           result.newWidth = Math.min(2048, size.width);
+           result.newHeight = Math.round(ratio * result.newWidth);
+        }
+        else if (screenW <= 4096 && size.width > 4096)
+        {
+          result.resize = true;
+          result.newWidth = Math.min(4096, size.width);
+          result.newHeight = Math.round(ratio * result.newWidth);
+        }
+      }
+    }
+    res.json(result);
+  });
+}
+
+function resizeImage(req, res)
+{
+  var fileName = req.params.f;
+  var f = path.join(config.uploadDir, fileName);
+
+  var width = parseInt(req.params.w);
+
+  createResizedImageIfNotExisting(f, width, function(err) {
+    var result = {
+        imageName: getSizeName(f, width),
+        success: false
+      };
+    if (!err) 
+    {
+      result.success = true;
+    }
+    res.json(result);
+  });
+}
 
 
 exports.exampleFile = exampleFile;
@@ -411,3 +545,5 @@ exports.getHistogram = getHistogram;
 exports.getThumbnail = getThumbnail;
 exports.getExistingUploads = getExistingUploads;
 exports.getExif = getExif;
+exports.getViewerWidthOptimizedWidth = getViewerWidthOptimizedWidth;
+exports.resizeImage = resizeImage;

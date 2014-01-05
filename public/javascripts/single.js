@@ -3,23 +3,72 @@ var checkQueueTimeout = 4000;
 var serverQueueTimeout = 5000;
 
 var shouldShowLoadingImage = false;
-function loadImage(imageName)
+function getScreenOptimizedImage(imageName, callback)
+{
+  var newImageName = imageName;
+  $.get(
+    'api/optimized/' + imageName + '/' + $(window).width() + '/' + $(window).height(),
+    function (optimizedData) {
+      if (optimizedData.resize)
+      {
+        $.get('api/resize/' + imageName + '/' + optimizedData.newWidth,
+        function (resizeResult) {
+          if (resizeResult.success)
+          {
+            newImageName = resizeResult.imageName;
+          }
+          callback(newImageName);
+        });
+      }
+      else
+      {
+        callback(newImageName);
+      }
+    });
+}
+
+function displayImage(imageName)
 {
   shouldShowLoadingImage = true;
   setTimeout(showLoadingImage, 500);
-  $('#imageName').text(imageName);
+  var $imageName = $('#imageName');
+  $imageName.text(imageName + ' loading...');
   var $mainImage = $('img#main');
   var img = new Image();
   img.src = imageName;
   img.onload = function() {
-    $mainImage.attr('src', imageName).attr('alt', imageName);
-    shouldShowLoadingImage = false;
-    $('img#loading').hide();
-    if (playbackState == 'play')
-    {
+    getScreenOptimizedImage(imageName, function(newImageName) {
+      $mainImage.attr('src', newImageName).attr('alt', imageName);
+      shouldShowLoadingImage = false;
+      $('img#loading').hide();
+      $imageName.text(newImageName);
+      if (playbackState == 'play')
+      {
         setTimeout(checkQueue, checkQueueTimeout);
-    }
+      }
+    });
   };
+}
+
+function preloadImage(imageName, callback)
+{
+  
+  var imgPreload = new Image();
+  $(imgPreload).attr({ src: imageName, alt: imageName });
+
+  // check if the image is already loaded (cached)
+  if (imgPreload.complete || imgPreload.readyState === 4) 
+  {
+    // image loaded
+    callback();
+  } 
+  else 
+  {
+    // go fetch the image
+    $(imgPreload).load(function (response, status, xhr) {
+      callback();
+    });
+  }
 }
 
 function showLoadingImage()
@@ -32,7 +81,7 @@ function showLoadingImage()
 
 function displayImageAndComponents(imageName)
 {
-  loadImage(imageName);
+  displayImage(imageName);
   getExifInfo(imageName);
   getHistogram(imageName);
 }
@@ -346,7 +395,7 @@ function initializeSingle()
 {
     //localStorage.removeItem('nev.histogram.visible');
     setupSocket();
-    loadImage('eyefi.gif');
+    displayImage('eyefi.gif');
     displayHistogramImage(null);
     updateProgressBar(0);
     attachFullScreenEvent();

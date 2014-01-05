@@ -116,7 +116,7 @@ img#loading {
     margin-bottom: auto;
     z-index: 5;
     left: 50%;
-    top: 50%;
+    top: 12px;
     opacity: 0.6;
     filter: alpha(opacity=60);
 }

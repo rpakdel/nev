@@ -41,9 +41,12 @@ app.get('/api/uploads', img.getExistingUploads);
 app.get('/api/exif/:f', img.getExif);
 app.get('/api/histogram/:f', img.getHistogram);
 app.get('/api/thumbnail/:f', img.getThumbnail);
+app.get('/api/optimized/:f/:w/:h', img.getViewerWidthOptimizedWidth);
+app.get('/api/resize/:f/:w', img.resizeImage);
 app.get('/api/queuesize', imgQ.getQueueSize);
 app.get('/api/queue', imgQ.getQueue);
 
-//img.enableDebugQueue();
+
+img.enableDebugQueue();
 console.log("> HTTP server running on " + config.httpServerIP + ":" + config.httpServerPort);
 httpServer.listen(config.httpServerPort);
