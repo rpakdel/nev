@@ -7,6 +7,8 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 var gm = require('gm');
 
+var imageScales = [1.0, 0.8, 0.6, 0.4, 0.2];
+
 var exampleIndex = 0;
 var exampleFile = path.join(config.uploadDir, 'example.jpg');
 var exampleFiles = [
@@ -133,11 +135,11 @@ function getExistingUploads(req, res)
   });
 }
 
-function getSizeName(f, size)
+function getSizeName(f, scale)
 {
   var extname = path.extname(f);
   var filename = path.basename(f, extname);
-  var sizeName = filename + '_' + size + extname;
+  var sizeName = filename + '_' + scale + extname;
   return sizeName;
 }
 
@@ -198,35 +200,46 @@ function getMiffPath(f)
   return miffPath;  
 }
 
-function createResizedImage(f, size, callback)
+function createResizedImage(f, scale, callback)
 {
-  var sizeName = getSizeName(f, size);
-  var sizePath = getSizePath(f, size);
+  var sizeName = getSizeName(f, scale);
+  var sizePath = getSizePath(f, scale);
 
-  console.log('> Creating resized image ' + sizeName);
-  var resizeCommand =
-    'gm convert -size ' + size + 'x' + size + ' ' + f +
-    ' -resize ' + size + 'x' + size + ' ' + sizePath;
-    
-  var resizeChildProcess = exec(resizeCommand, function (error, stdout, stderr) {    
-    console.log('> Resize process stdout: ' + stdout);
-    if (error !== null) 
+  gm(f).size(function (err, size) {
+    if (!err)
     {
-      console.log('! Resize process exec error: ' + error);
-      console.log('! Resize process stderr: ' + stderr);
-      callback(error);
+        console.log('> Creating resized image ' + sizeName);
+        var newW = size.width * scale;
+        var newH = size.height * scale;
+        var resizeCommand =
+        'gm convert -size ' + newW + 'x' + newH + ' ' + f +
+        ' -resize ' + newW + 'x' + newH + ' ' + sizePath;
+    
+        var resizeChildProcess = exec(resizeCommand, function (error, stdout, stderr) {
+            console.log('> Resize process stdout: ' + stdout);
+            if (error !== null) 
+            {
+                console.log('! Resize process exec error: ' + error);
+                console.log('! Resize process stderr: ' + stderr);
+                callback(error);
+            }
+            else
+            {
+               callback(null);
+            }
+        });
     }
     else
     {
-      callback(null);
+        callback(err);
     }
   });
 }
 
-function createResizedImageIfNotExisting(f, size, callback)
+function createResizedImageIfNotExisting(f, scale, callback)
 {
-  var sizeName = getSizeName(f, size);
-  var sizePath = getSizePath(f, size);
+  var sizeName = getSizeName(f, scale);
+  var sizePath = getSizePath(f, scale);
 
   fs.exists(sizePath, function(exists) {
     if (exists)
@@ -235,7 +248,7 @@ function createResizedImageIfNotExisting(f, size, callback)
     }
     else
     {
-      createResizedImage(f, size, callback);
+      createResizedImage(f, scale, callback);
     }
   });
 }
@@ -463,46 +476,51 @@ function getViewerWidthOptimizedWidth(req, res)
   var screenW = parseInt(req.params.w);
   var screenH = parseInt(req.params.h);
 
+  var screenP = screenW * screenH;
+
   gm(f).size(function (err, size) {
     var result = {
       screenWidth: screenW,
       screenHeight: screenH,
-      resize: false, 
+      screenPixels: screenP,
+      resize: false,
+      imageWidth: -1,
+      imageHeight: -1,
+      imagePixels: -1, 
       newWidth: -1,
-      newHeight: -1
+      newHeight: -1,
+      newPixels: -1,
+      scale: 1.0
     };
     if (!err)
     {
       result.imageWidth = size.width;
       result.imageHeight = size.height;
-      var ratio = size.height/size.width;
-      // no need to resize if image is narrower than screen width
-      if (size.width > screenW)
+      var imagePixels = size.width * size.height;
+      result.imagePixels = imagePixels;
+      var scaleIndex = 1; // 0 is no resize
+      for (scaleIndex = 1; scaleIndex < imageScales.length; scaleIndex++)
       {
-        if (screenW <= 512)
-        {
+          var scale = imageScales[scaleIndex];
+          var w = size.width * scale;
+          var h = size.height * scale;
+          var p = w * h;
+
+          if (p < screenP)
+          {
+              break;
+          }
+      }
+
+      // use one size larger
+      result.scale = imageScales[scaleIndex - 1];
+      result.newWidth = size.width * result.scale;
+      result.newHeight = size.height * result.scale;
+      result.newPixels = result.newWidth * result.newHeight;
+
+      if (scale < 1.0)
+      {
           result.resize = true;
-          result.newWidth = Math.min(512, size.width);
-          result.newHeight = Math.round(ratio * result.newWidth);
-        }
-        else if (screenW <= 1024)
-        {
-          result.resize = true;
-          result.newWidth = Math.min(1024, size.width);
-          result.newHeight = Math.round(ratio * result.newWidth);
-        }
-        else if (screenW <= 2048 && size.width > 2048)
-        {
-           result.resize = true;
-           result.newWidth = Math.min(2048, size.width);
-           result.newHeight = Math.round(ratio * result.newWidth);
-        }
-        else if (screenW <= 4096 && size.width > 4096)
-        {
-          result.resize = true;
-          result.newWidth = Math.min(4096, size.width);
-          result.newHeight = Math.round(ratio * result.newWidth);
-        }
       }
     }
     res.json(result);
@@ -514,11 +532,11 @@ function resizeImage(req, res)
   var fileName = req.params.f;
   var f = path.join(config.uploadDir, fileName);
 
-  var width = parseInt(req.params.w);
+  var scale = parseFloat(req.params.s);
 
-  createResizedImageIfNotExisting(f, width, function(err) {
+  createResizedImageIfNotExisting(f, scale, function(err) {
     var result = {
-        imageName: getSizeName(f, width),
+        imageName: getSizeName(f, scale),
         success: false
       };
     if (!err) 

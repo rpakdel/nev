@@ -11,7 +11,7 @@ function getScreenOptimizedImage(imageName, callback)
     function (optimizedData) {
       if (optimizedData.resize)
       {
-        $.get('api/resize/' + imageName + '/' + optimizedData.newWidth,
+        $.get('api/resize/' + imageName + '/' + optimizedData.scale,
         function (resizeResult) {
           if (resizeResult.success)
           {
@@ -34,9 +34,9 @@ function displayImage(imageName)
   var $imageName = $('#imageName');
   $imageName.text(imageName + ' loading...');
   var $mainImage = $('img#main');
-  var img = new Image();
-  img.src = imageName;
-  img.onload = function() {
+  //var img = new Image();
+  //img.src = imageName;
+  //img.onload = function() {
     getScreenOptimizedImage(imageName, function(newImageName) {
       $mainImage.attr('src', newImageName).attr('alt', imageName);
       shouldShowLoadingImage = false;
@@ -47,7 +47,7 @@ function displayImage(imageName)
         setTimeout(checkQueue, checkQueueTimeout);
       }
     });
-  };
+  //};
 }
 
 function preloadImage(imageName, callback)

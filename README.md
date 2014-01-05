@@ -27,3 +27,4 @@ TODO
 - If a request for histogram or thumbnail or optimized size are made while we're generating the histogram, 
   thumbnail or smller image, a duplicate request for the thumbnail, histogram or optimized image is made.
 - Front-end timing is off (green progress bar).
+- Resize images on upload rather than when requested to prevent multiple requests
