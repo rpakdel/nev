@@ -45,6 +45,7 @@ app.get('/api/optimized/:f/:w/:h', img.getViewerWidthOptimizedWidth);
 app.get('/api/resize/:f/:s', img.resizeImage);
 app.get('/api/queuesize', imgQ.getQueueSize);
 app.get('/api/queue', imgQ.getQueue);
+app.get('/api/demo', img.enableDemo);
 
 
 //img.enableDebugQueue();

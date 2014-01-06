@@ -17,7 +17,10 @@ var exampleFiles = [
   path.join(config.uploadDir, 'example2.jpg'),
   path.join(config.uploadDir, 'example3.jpg'),
   path.join(config.uploadDir, 'example4.jpg'),
-  path.join(config.uploadDir, 'example5.jpg') ];
+  path.join(config.uploadDir, 'example5.jpg'),
+  path.join(config.uploadDir, 'example6.jpg'),
+  path.join(config.uploadDir, 'example7.jpg'),
+  path.join(config.uploadDir, 'example8.jpg'), ];
 
 function queueNextExample()
 {
@@ -29,10 +32,15 @@ function queueNextExample()
     }
 }
 
+var demoEnabled = false;
 function enableDebugQueue()
 {
-  console.log('Queueing example images every 4000ms.');
-  setInterval(queueNextExample, 6000);
+  if (!demoEnabled)
+  {
+    demoEnabled = true;
+    console.log('Queueing example images every 4000ms.');
+    setInterval(queueNextExample, 6000);
+  }
 }
 
 function startWatchingDir(newFileCallback, fileDeletedCallback, fileChangedCallback)
@@ -547,6 +555,11 @@ function resizeImage(req, res)
   });
 }
 
+function enableDemo(req, res)
+{
+  enableDebugQueue();
+  res.send(200);
+}
 
 exports.exampleFile = exampleFile;
 exports.getThumbName = getThumbName;
@@ -565,3 +578,4 @@ exports.getExistingUploads = getExistingUploads;
 exports.getExif = getExif;
 exports.getViewerWidthOptimizedWidth = getViewerWidthOptimizedWidth;
 exports.resizeImage = resizeImage;
+exports.enableDemo = enableDemo;

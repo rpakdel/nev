@@ -34,20 +34,17 @@ function displayImage(imageName)
   var $imageName = $('#imageName');
   $imageName.text(imageName + ' loading...');
   var $mainImage = $('img#main');
-  //var img = new Image();
-  //img.src = imageName;
-  //img.onload = function() {
-    getScreenOptimizedImage(imageName, function(newImageName) {
-      $mainImage.attr('src', newImageName).attr('alt', imageName);
-      shouldShowLoadingImage = false;
-      $('img#loading').hide();
-      $imageName.text(newImageName);
-      if (playbackState == 'play')
-      {
-        setTimeout(checkQueue, checkQueueTimeout);
-      }
-    });
-  //};
+  
+  getScreenOptimizedImage(imageName, function(newImageName) {
+    $mainImage.attr('src', newImageName).attr('alt', imageName);
+    shouldShowLoadingImage = false;
+    $('img#loading').hide();
+    $imageName.text(newImageName);
+    if (playbackState == 'play')
+    {
+      setTimeout(checkQueue, checkQueueTimeout);
+    }
+  });
 }
 
 function preloadImage(imageName, callback)
@@ -388,12 +385,20 @@ function toggleAutoplay()
 
 function setupAutoplay()
 {
-    $('#toggleAutoplayButton').click(toggleAutoplay);
+  $('#toggleAutoplayButton').click(toggleAutoplay);
+}
+
+function setupDemo()
+{
+  $('#demoButton').click(function() {
+    $.get('api/demo', function() {
+      $('#demoButton').hide();
+      });
+  });
 }
 
 function initializeSingle()
 {
-    //localStorage.removeItem('nev.histogram.visible');
     setupSocket();
     displayImage('eyefi.gif');
     displayHistogramImage(null);
@@ -401,6 +406,7 @@ function initializeSingle()
     attachFullScreenEvent();
     setInterval(timerDecrement, 260);
     setupAutoplay();
+    setupDemo();
     setupHistogram();
     setupThumbnails();
 }
