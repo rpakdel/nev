@@ -24,7 +24,7 @@ var exampleFiles = [
 
 function queueNextExample()
 {
-    require('./imgQ.js').push(exampleFiles[exampleIndex]);
+    require('./imgQ.js').pushNewFile(exampleFiles[exampleIndex]);
     exampleIndex++;
     if (exampleIndex >= exampleFiles.length) 
     { 
@@ -330,6 +330,23 @@ function createThumbHistogram(thumbPath, callback)
   });
 }
 
+function createHistogramIfNotExisting(f, callback)
+{
+  var thumbPath = getThumbPath(f);
+  var hisPath = getHisPath(thumbPath);
+
+  fs.exists(hisPath, function(exists) {
+    if (!exists)
+    {
+      createHistogram(f, callback);
+    }
+    else
+    {
+      callback(null);
+    }
+  });
+}
+
 function createHistogram(f, callback)
 {
   var thumbPath = getThumbPath(f);
@@ -415,6 +432,23 @@ function getHistogram(req, res)
       }
     });
     
+}
+
+function createThumbnailIfNotExisting(f, callback)
+{
+  var thumbName = getThumbName(f);
+  var thumbPath = getThumbPath(f);
+
+  fs.exists(thumbPath, function(exists) {
+    if (!exists)
+    {
+      createThumbnail(f, callback);
+    }
+    else
+    {
+      callback(null);
+    }
+  });
 }
 
 function getThumbnail(req, res)
@@ -561,6 +595,50 @@ function enableDemo(req, res)
   res.send(200);
 }
 
+function processFile(f, callback)
+{
+  var resizeNextF = function(i, callback1) {
+    if (i < imageScales.length)
+    {
+      createResizedImageIfNotExisting(f, imageScales[i], function(err) {
+        if (!err)
+        {
+          i++;
+          resizeNextF(i, callback1);
+        }
+        else
+        {
+          callback1(err);
+        }
+      });
+    }
+    else
+    {
+      callback1(null);
+    }
+  };
+
+  createHistogramIfNotExisting(f, function(hisErr) {
+    if (!hisErr)
+    {
+      resizeNextF(1, function(resizeErr) {
+        if (!resizeErr)
+        {
+          callback(null);
+        }
+        else
+        {          
+          callback(resizeErr);
+        }
+      });
+    }
+    else
+    {
+      callback(hisErr);
+    }
+  });
+}
+
 exports.exampleFile = exampleFile;
 exports.getThumbName = getThumbName;
 exports.getThumbPath = getThumbPath;
@@ -568,8 +646,9 @@ exports.getHisName = getHisName;
 exports.getHisPath = getHisPath;
 exports.getExifData = getExifData;
 exports.createHistogram = createHistogram;
-
+exports.processFile = processFile;
 exports.enableDebugQueue = enableDebugQueue;
+
 
 // web-api
 exports.getHistogram = getHistogram;

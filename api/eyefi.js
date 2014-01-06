@@ -21,7 +21,7 @@ function setup()
     {
       console.log();
       console.log('> Eyefi server received an image: ' + f);
-      imgQ.push(f);      
+      imgQ.pushNewFile(f);      
     }
   });
 

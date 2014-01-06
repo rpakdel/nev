@@ -2,30 +2,52 @@ var sock = require('./sock.js');
 var img = require('./img.js');
 var path = require('path');
 
-var queue = [];
+var readyQueue = [];
+var processQueue = [];
 
-function check()
+function checkReadyQueueAndEmit()
 {
-  if (queue.length === 0)
+  if (readyQueue.length === 0)
   {
     return;
   }
 
-  var f = queue.shift();
-  onNewFile(f);
+  var f = readyQueue.shift();
+  emitNewFileReady(f);
+}
+
+function checkProcessQueueAndProcess()
+{
+  if (processQueue.length === 0)
+  {
+    return;
+  }
+
+  var f = processQueue.shift();
+  img.processFile(f, function(err) {
+    if (!err)
+    {
+      readyQueue.push(f);
+    }
+    else
+    {
+      console.log('! Skipping ' + f + ' because ' + err);
+    }
+  });
 }
 
 function setup(interval)
 {
-  setInterval(check, interval);
+  setInterval(checkProcessQueueAndProcess, interval);
+  setInterval(checkReadyQueueAndEmit, interval);
 }
 
-function push(item)
+function pushNewFile(f)
 {
-  queue.push(item);
+  processQueue.push(f);
 }
 
-function onNewFile(f) 
+function emitNewFileReady(f) 
 {  
   var baseName = path.basename(f);
   sock.emitNewFile(baseName);
@@ -33,15 +55,15 @@ function onNewFile(f)
 
 function getQueueSize(req, res)
 {
-    res.json({ length: queue.length });
+    res.json({ length: readyQueue.length });
 }
 
 function getQueue(req, res)
 {
-  res.json({ queue: queue });
+  res.json({ queue: readyQueue });
 }
 
 exports.setup = setup;
 exports.getQueueSize = getQueueSize;
 exports.getQueue = getQueue;
-exports.push = push;
+exports.pushNewFile = pushNewFile;
