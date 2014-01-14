@@ -1,6 +1,7 @@
 var sock = require('./sock.js');
 var img = require('./img.js');
 var path = require('path');
+var config = require('../config.js');
 
 var readyQueue = [];
 var processQueue = [];
@@ -16,15 +17,22 @@ function checkReadyQueueAndEmit()
   emitNewFileReady(f);
 }
 
+var processingImage = false;
 function checkProcessQueueAndProcess()
 {
-  if (processQueue.length === 0)
+  // check if something is available for processing
+  // do not process more than one image at once if requested
+  if (processQueue.length === 0 || 
+     (config.processOnlyOneImage && processingImage))
   {
     return;
   }
 
+  processingImage = true;
+
   var f = processQueue.shift();
   img.processFile(f, function(err) {
+    processingImage = false;
     if (!err)
     {
       readyQueue.push(f);
@@ -55,12 +63,18 @@ function emitNewFileReady(f)
 
 function getQueueSize(req, res)
 {
-    res.json({ length: readyQueue.length });
+  res.json({ 
+    processQueueLength: processQueue.length,
+    readyQueueLength: readyQueue.length 
+  });
 }
 
 function getQueue(req, res)
 {
-  res.json({ queue: readyQueue });
+  res.json({ 
+    readyQueue: readyQueue,
+    processQueue: processQueue 
+  });
 }
 
 exports.setup = setup;

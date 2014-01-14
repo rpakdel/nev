@@ -6,6 +6,7 @@ var exif = require('exif2');
 var exec = require('child_process').exec;
 var fs = require('fs');
 var gm = require('gm');
+var imgQ = require('./imgQ.js');
 
 var imageScales = [1.0, 0.8, 0.6, 0.4, 0.2];
 
@@ -22,9 +23,17 @@ var exampleFiles = [
   path.join(config.uploadDir, 'example7.jpg'),
   path.join(config.uploadDir, 'example8.jpg'), ];
 
+function queueAllExamples()
+{
+  for (var i in exampleFiles)
+  {
+    imgQ.pushNewFile(exampleFiles[i]);
+  }
+}
+
 function queueNextExample()
 {
-    require('./imgQ.js').pushNewFile(exampleFiles[exampleIndex]);
+    imgQ.pushNewFile(exampleFiles[exampleIndex]);
     exampleIndex++;
     if (exampleIndex >= exampleFiles.length) 
     { 
@@ -38,6 +47,8 @@ function enableDebugQueue()
   if (!demoEnabled)
   {
     demoEnabled = true;
+    console.log('Queueing all example files.');
+    queueAllExamples();
     console.log('Queueing example images every 4000ms.');
     setInterval(queueNextExample, 6000);
   }
@@ -224,7 +235,7 @@ function createResizedImage(f, scale, callback)
         ' -resize ' + newW + 'x' + newH + ' ' + sizePath;
     
         var resizeChildProcess = exec(resizeCommand, function (error, stdout, stderr) {
-            console.log('> Resize process stdout: ' + stdout);
+            //console.log('> Resize process stdout: ' + stdout);
             if (error !== null) 
             {
                 console.log('! Resize process exec error: ' + error);
@@ -272,7 +283,7 @@ function createThumbnail(f, callback)
     ' -resize 512x512 ' + thumbPath;
     
   var resizeChildProcess = exec(resizeCommand, function (error, stdout, stderr) {    
-    console.log('> Resize process stdout: ' + stdout);
+    //console.log('> Resize process stdout: ' + stdout);
     if (error !== null) 
     {
       console.log('! Resize process exec error: ' + error);
@@ -312,7 +323,7 @@ function createThumbHistogram(thumbPath, callback)
     sep +
     'gm convert ' + miffPath + ' ' + hisPath;
   var child = exec(hisCommand, function (error, stdout, stderr) {
-    console.log(' Histogram process stdout: ' + stdout);
+    //console.log(' Histogram process stdout: ' + stdout);
     if (fs.existsSync(miffPath))
     {
       fs.unlinkSync(miffPath);

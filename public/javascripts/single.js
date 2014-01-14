@@ -144,9 +144,9 @@ function timerDecrement()
     $('#timerBar').animate({ width: timerBarWidth }, 250);
 }
 
-function queueUpdated(qLength)
+function queueUpdated(processQueueLength, readyQueueLength)
 {
-    $('#queueLen').text('Q:' + qLength);
+    $('#queueLen').text('P:' + processQueueLength + " R:" + readyQueueLength );
 }
       
 function attachFullScreenEvent()
@@ -204,7 +204,7 @@ function getHistogram(fileName)
 function checkQueue()
 {
     $.get('api/queuesize', function(data) {
-        queueUpdated(data.length);
+        queueUpdated(data.processQueueLength, data.readyQueueLength);
     });
 }
 
@@ -234,9 +234,9 @@ function addImageThumbnail(imageName)
       });
 }
 
-function setupSocket() 
+function setupSocket(host) 
 {
-    var socket = io.connect('#{serverIp}');
+    var socket = io.connect(host);
     socket.on('newFile', function(data) {
       if (playbackState != "pause")
       {
@@ -249,10 +249,6 @@ function setupSocket()
 
     socket.on('uploadingImage', function(data) {
         updateProgressBar(data.percent);
-    });
-
-    socket.on('queueUpdated', function(data) {
-        queueUpdated(data.queueLength);
     });
 }
 
@@ -388,25 +384,32 @@ function setupAutoplay()
   $('#toggleAutoplayButton').click(toggleAutoplay);
 }
 
-function setupDemo()
+function setupDemo(showRunDemoButton)
 {
-  $('#demoButton').click(function() {
-    $.get('api/demo', function() {
-      $('#demoButton').hide();
+  if (showRunDemoButton == 'true')
+  {
+    $('#demoButton').click(function() {
+      $.get('api/demo', function() {
+        $('#demoButton').hide();
       });
-  });
+    });
+  }
+  else
+  {
+    $('#demoButton').hide();
+  }
 }
 
-function initializeSingle()
+function initializeSingle(host, showRunDemoButton)
 {
-    setupSocket();
+    setupSocket(host);
     displayImage('eyefi.gif');
     displayHistogramImage(null);
     updateProgressBar(0);
     attachFullScreenEvent();
     setInterval(timerDecrement, 260);
     setupAutoplay();
-    setupDemo();
+    setupDemo(showRunDemoButton);
     setupHistogram();
     setupThumbnails();
 }
