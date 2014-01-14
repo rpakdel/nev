@@ -206,3 +206,7 @@ img#loading {
   transform: translateY(-32px) scale(2);
   cursor: pointer;
 }
+
+.processing {
+    color: red;
+}

@@ -144,9 +144,11 @@ function timerDecrement()
     $('#timerBar').animate({ width: timerBarWidth }, 250);
 }
 
-function queueUpdated(processQueueLength, readyQueueLength)
+function setQueueStatus(queueStatus)
 {
-    $('#queueLen').text('P:' + processQueueLength + " R:" + readyQueueLength );
+  var $queueLen = $('#queueLen');
+  $queueLen.text('P:' + queueStatus.processQueueLength + " R:" + queueStatus.readyQueueLength );
+  $queueLen.toggleClass('processing', queueStatus.processing);
 }
       
 function attachFullScreenEvent()
@@ -203,9 +205,7 @@ function getHistogram(fileName)
 
 function checkQueue()
 {
-    $.get('api/queuesize', function(data) {
-        queueUpdated(data.processQueueLength, data.readyQueueLength);
-    });
+    $.get('api/queueStatus', setQueueStatus);
 }
 
 function addImageThumbnail(imageName)

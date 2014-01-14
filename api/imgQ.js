@@ -61,11 +61,12 @@ function emitNewFileReady(f)
   sock.emitNewFile(baseName);
 }
 
-function getQueueSize(req, res)
+function getQueueStatus(req, res)
 {
   res.json({ 
     processQueueLength: processQueue.length,
-    readyQueueLength: readyQueue.length 
+    readyQueueLength: readyQueue.length,
+    processing: processingImage
   });
 }
 
@@ -78,6 +79,6 @@ function getQueue(req, res)
 }
 
 exports.setup = setup;
-exports.getQueueSize = getQueueSize;
+exports.getQueueStatus = getQueueStatus;
 exports.getQueue = getQueue;
 exports.pushNewFile = pushNewFile;
