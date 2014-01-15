@@ -46,7 +46,7 @@ function checkProcessQueueAndProcess()
 
 function setup(interval)
 {
-  setInterval(checkProcessQueueAndProcess, interval);
+  setInterval(checkProcessQueueAndProcess, 1000);
   setInterval(checkReadyQueueAndEmit, interval);
 }
 

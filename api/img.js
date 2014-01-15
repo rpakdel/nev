@@ -54,6 +54,11 @@ function enableDebugQueue()
   }
 }
 
+function isDemoEnabled()
+{
+  return demoEnabled;
+}
+
 function startWatchingDir(newFileCallback, fileDeletedCallback, fileChangedCallback)
 {
   var imagesDir = config.imagesDir;
@@ -669,3 +674,4 @@ exports.getExif = getExif;
 exports.getViewerWidthOptimizedWidth = getViewerWidthOptimizedWidth;
 exports.resizeImage = resizeImage;
 exports.enableDemo = enableDemo;
+exports.isDemoEnabled = isDemoEnabled;

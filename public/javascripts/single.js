@@ -1,5 +1,5 @@
 var playbackState = 'play';
-var checkQueueTimeout = 4000;
+var checkQueueTimeout = 500;
 var serverQueueTimeout = 5000;
 
 var shouldShowLoadingImage = false;
@@ -42,7 +42,8 @@ function displayImage(imageName)
     $imageName.text(newImageName);
     if (playbackState == 'play')
     {
-      setTimeout(checkQueue, checkQueueTimeout);
+      updateQueueStatus();
+      setTimeout(updateQueueStatus, checkQueueTimeout);
     }
   });
 }
@@ -203,7 +204,7 @@ function getHistogram(fileName)
     });
 }
 
-function checkQueue()
+function updateQueueStatus()
 {
     $.get('api/queueStatus', setQueueStatus);
 }
@@ -355,12 +356,12 @@ function showPlaybackButton()
 {
     if (playbackState == 'play')
     {
-        $('#timerBar').show();
+        //$('#timerBar').show();
         $('img#toggleAutoplayImg').attr('src', 'pause.png').attr('alt', 'pause');
     }
     else
     {
-        $('#timerBar').hide();
+        //$('#timerBar').hide();
         $('img#toggleAutoplayImg').attr('src', 'play.png').attr('alt', 'play');
     }
 }
@@ -374,7 +375,7 @@ function toggleAutoplay()
     else
     {
         playbackState = 'play';
-        checkQueue();
+        updateQueueStatus();
     }
     showPlaybackButton();
 }
@@ -407,7 +408,7 @@ function initializeSingle(host, showRunDemoButton)
     displayHistogramImage(null);
     updateProgressBar(0);
     attachFullScreenEvent();
-    setInterval(timerDecrement, 260);
+    //setInterval(timerDecrement, 260);
     setupAutoplay();
     setupDemo(showRunDemoButton);
     setupHistogram();
