@@ -8,7 +8,7 @@ var fs = require('fs');
 var gm = require('gm');
 var imgQ = require('./imgQ.js');
 
-var imageScales = [1.0, 0.8, 0.6, 0.4, 0.2];
+var imageScales = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
 
 var exampleIndex = 0;
 var exampleFile = path.join(config.uploadDir, 'example.jpg');
@@ -25,6 +25,7 @@ var exampleFiles = [
 
 function queueAllExamples()
 {
+  console.log('Queueing all example files.');
   for (var i in exampleFiles)
   {
     imgQ.pushNewFile(exampleFiles[i]);
@@ -46,11 +47,7 @@ function enableDebugQueue()
 {
   if (!demoEnabled)
   {
-    demoEnabled = true;
-    console.log('Queueing all example files.');
-    queueAllExamples();
-    console.log('Queueing example images every 4000ms.');
-    setInterval(queueNextExample, 6000);
+    demoEnabled = true;    
   }
 }
 
@@ -611,6 +608,13 @@ function enableDemo(req, res)
   res.send(200);
 }
 
+function pushExamples(req, res)
+{
+  enableDebugQueue();
+  queueAllExamples();
+  res.send(200);
+}
+
 function processFile(f, callback)
 {
   var resizeNextF = function(i, callback1) {
@@ -675,3 +679,4 @@ exports.getViewerWidthOptimizedWidth = getViewerWidthOptimizedWidth;
 exports.resizeImage = resizeImage;
 exports.enableDemo = enableDemo;
 exports.isDemoEnabled = isDemoEnabled;
+exports.pushExamples = pushExamples;

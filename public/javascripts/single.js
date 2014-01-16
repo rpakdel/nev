@@ -1,6 +1,5 @@
 var playbackState = 'play';
 var checkQueueTimeout = 500;
-var serverQueueTimeout = 5000;
 
 var shouldShowLoadingImage = false;
 function getScreenOptimizedImage(imageName, callback)
@@ -128,23 +127,6 @@ function updateProgressBar(percent)
     }
 }
 
-function timerDecrement()
-{
-    if (playbackState == 'pause')
-    {
-        return;
-    }
-
-    serverQueueTimeout = serverQueueTimeout - 510;
-    if (serverQueueTimeout < 0)
-    {
-        serverQueueTimeout = 0;
-    }
-    var percent = serverQueueTimeout * 100.0/ 5000.0;
-    var timerBarWidth = percent * $(window).width() / 100.0;
-    $('#timerBar').animate({ width: timerBarWidth }, 250);
-}
-
 function setQueueStatus(queueStatus)
 {
   var $queueLen = $('#queueLen');
@@ -244,7 +226,6 @@ function setupSocket(host)
           displayImageAndComponents(data.fileName);
       }
       // next notification is in 5s
-      serverQueueTimeout = 5000;
       addImageThumbnail(data.fileName);      
     });
 
@@ -387,18 +368,11 @@ function setupAutoplay()
 
 function setupDemo(showRunDemoButton)
 {
-  if (showRunDemoButton == 'true')
-  {
     $('#demoButton').click(function() {
-      $.get('api/demo', function() {
-        $('#demoButton').hide();
+      $.get('api/pushExamples', function() {
+        updateQueueStatus(); 
       });
     });
-  }
-  else
-  {
-    $('#demoButton').hide();
-  }
 }
 
 function initializeSingle(host, showRunDemoButton)
