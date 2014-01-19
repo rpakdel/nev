@@ -202,9 +202,13 @@ img#loading {
 }
 
 .thumbnail:hover {
-  -webkit-transform: translateY(-32px) scale(2);
   transform: translateY(-32px) scale(2);
+  transition: 0.15s ease-in-out;
   cursor: pointer;
+}
+
+.thumbnail:not(:hover) {
+    transition: 0.25s ease-in-out;
 }
 
 .processing {

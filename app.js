@@ -24,6 +24,7 @@ function configure() {
 
     app.use(express.static(config.imagesDir));
     app.use(express.static(config.uploadDir));
+    app.use(express.static(config.artefactsDir));
     app.use(express.static(config.publicDir));
 }
 

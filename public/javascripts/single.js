@@ -8,8 +8,6 @@ function getScreenOptimizedImage(imageName, callback)
   $.get(
     'api/optimized/' + imageName + '/' + $(window).width() + '/' + $(window).height(),
     function (optimizedData) {
-      if (optimizedData.resize)
-      {
         $.get('api/resize/' + imageName + '/' + optimizedData.scale,
         function (resizeResult) {
           if (resizeResult.success)
@@ -18,11 +16,6 @@ function getScreenOptimizedImage(imageName, callback)
           }
           callback(newImageName);
         });
-      }
-      else
-      {
-        callback(newImageName);
-      }
     });
 }
 

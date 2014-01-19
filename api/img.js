@@ -11,7 +11,6 @@ var imgQ = require('./imgQ.js');
 var imageScales = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
 
 var exampleIndex = 0;
-var exampleFile = path.join(config.uploadDir, 'example.jpg');
 var exampleFiles = [
   path.join(config.uploadDir, 'example.jpg'),
   path.join(config.uploadDir, 'example1.jpg'),
@@ -139,7 +138,8 @@ function getExistingUploads(req, res)
       {        
         var imageName = files[i];
         if (imageName.indexOf('_THUMB') == -1 &&
-            imageName.indexOf('_HIS') == -1)
+            imageName.indexOf('_HIS') == -1 &&
+            imageName.indexOf('artefacts') == -1)
         {
           var stats = fs.statSync(path.join(config.uploadDir, imageName));
           // use same JSON as onNewFile()
@@ -166,9 +166,8 @@ function getSizeName(f, scale)
 
 function getSizePath(f, size)
 {
-  var dirname = path.dirname(f);
   var sizeName = getSizeName(f, size);
-  var sizePath = path.join(dirname, sizeName);
+  var sizePath = path.join(config.artefactsDir, sizeName);
   return sizePath;
 }
 
@@ -183,9 +182,8 @@ function getThumbName(f)
 
 function getThumbPath(f)
 {
-  var dirname = path.dirname(f);
   var thumbName = getThumbName(f);
-  var thumbPath = path.join(dirname, thumbName);
+  var thumbPath = path.join(config.artefactsDir, thumbName);
   return thumbPath;
 }
 
@@ -194,14 +192,14 @@ function getHisName(f)
   var extname = path.extname(f);
   var filename = path.basename(f, extname);
   var hisName = filename + '_HIS' + extname;
+  //var hisName = filename + '_HIS.gif';
   return hisName;
 }
 
 function getHisPath(f)
 {
-  var dirname = path.dirname(f);
   var hisName = getHisName(f);
-  var hisPath = path.join(dirname, hisName);
+  var hisPath = path.join(config.artefactsDir, hisName);
   return hisPath;
 }
 
@@ -215,9 +213,8 @@ function getMiffName(f)
 
 function getMiffPath(f)
 {
-  var dirname = path.dirname(f);
   var miffName = getMiffName(f);
-  var miffPath = path.join(dirname, miffName);
+  var miffPath = path.join(config.artefactsDir, miffName);
   return miffPath;  
 }
 
@@ -320,10 +317,10 @@ function createThumbHistogram(thumbPath, callback)
   console.log('> Creating thumbnail histogram ' + hisName);
   var sep = getOSCommandSep();
   var hisCommand = 
-    'gm convert ' + thumbPath + 
+    'gm convert -size 512x512 ' + thumbPath + 
     ' histogram:' + miffPath + 
     sep +
-    'gm convert ' + miffPath + ' ' + hisPath;
+    'gm convert -strip ' + miffPath + ' ' + hisPath;
   var child = exec(hisCommand, function (error, stdout, stderr) {
     //console.log(' Histogram process stdout: ' + stdout);
     if (fs.existsSync(miffPath))
@@ -538,7 +535,6 @@ function getViewerWidthOptimizedWidth(req, res)
       screenWidth: screenW,
       screenHeight: screenH,
       screenPixels: screenP,
-      resize: false,
       imageWidth: -1,
       imageHeight: -1,
       imagePixels: -1, 
@@ -572,11 +568,6 @@ function getViewerWidthOptimizedWidth(req, res)
       result.newWidth = size.width * result.scale;
       result.newHeight = size.height * result.scale;
       result.newPixels = result.newWidth * result.newHeight;
-
-      if (scale < 1.0)
-      {
-          result.resize = true;
-      }
     }
     res.json(result);
   });
@@ -641,7 +632,7 @@ function processFile(f, callback)
   createHistogramIfNotExisting(f, function(hisErr) {
     if (!hisErr)
     {
-      resizeNextF(1, function(resizeErr) {
+      resizeNextF(0, function(resizeErr) {
         if (!resizeErr)
         {
           callback(null);
@@ -659,7 +650,6 @@ function processFile(f, callback)
   });
 }
 
-exports.exampleFile = exampleFile;
 exports.getThumbName = getThumbName;
 exports.getThumbPath = getThumbPath;
 exports.getHisName = getHisName;
