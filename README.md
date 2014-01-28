@@ -34,7 +34,7 @@ Installation and Running
 - Follow the Preparation section of https://github.com/usefulthink/node-eyefi
 - Setup your card key in mycards.js.
 - run node app.js.
-- Open a browser to <server_ip>:8080.
+- Open a browser to server_ip:8080.
 
 
 TODO
