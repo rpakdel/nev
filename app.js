@@ -40,6 +40,7 @@ app.get('/single', routes.single);
 
 app.get('/api/uploads', img.getExistingUploads);
 app.get('/api/exif/:f', img.getExif);
+app.get('/api/exifall/:f', img.getExifAll);
 app.get('/api/histogram/:f', img.getHistogram);
 app.get('/api/thumbnail/:f', img.getThumbnail);
 app.get('/api/optimized/:f/:w/:h', img.getViewerWidthOptimizedWidth);
