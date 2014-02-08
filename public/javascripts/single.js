@@ -210,9 +210,9 @@ function addImageThumbnail(imageName)
       });
 }
 
-function setupSocket(host) 
+function setupSocket() 
 {
-    var socket = io.connect(host);
+    var socket = io.connect();
     socket.on('newFile', function(data) {
       if (playbackState != "pause")
       {
@@ -368,14 +368,13 @@ function setupDemo(showRunDemoButton)
     });
 }
 
-function initializeSingle(host, showRunDemoButton)
+function initializeSingle(showRunDemoButton)
 {
-    setupSocket(host);
+    setupSocket();
     displayImage('eyefi.gif');
     displayHistogramImage(null);
     updateProgressBar(0);
     attachFullScreenEvent();
-    //setInterval(timerDecrement, 260);
     setupAutoplay();
     setupDemo(showRunDemoButton);
     setupHistogram();

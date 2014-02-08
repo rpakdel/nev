@@ -129,7 +129,7 @@ function getExistingUploads(req, res)
     if (err)
     {
       console.log('err ' + err);
-      res.send(err);
+      res.json(err);
     }
     else
     {      
@@ -520,6 +520,23 @@ function getExif(req, res)
   });
 }
 
+function getExifAll(req, res)
+{
+  var fileName = req.params.f;
+  var f = path.join(config.uploadDir, fileName);
+
+  exif(f, function(err, exifData) {
+    if (err)
+    {
+      res.json(err);
+    }
+    else
+    {
+      res.json(exifData);
+    }
+  });
+}
+
 function getViewerWidthOptimizedWidth(req, res)
 {
   var fileName = req.params.f;
@@ -665,6 +682,7 @@ exports.getHistogram = getHistogram;
 exports.getThumbnail = getThumbnail;
 exports.getExistingUploads = getExistingUploads;
 exports.getExif = getExif;
+exports.getExifAll = getExifAll;
 exports.getViewerWidthOptimizedWidth = getViewerWidthOptimizedWidth;
 exports.resizeImage = resizeImage;
 exports.enableDemo = enableDemo;
