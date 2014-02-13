@@ -1,4 +1,3 @@
-var watch = require('watch');
 var path = require('path');
 var config = require('../config.js');
 var path = require('path');
@@ -16,11 +15,7 @@ var exampleFiles = [
   path.join(config.uploadDir, 'example1.jpg'),
   path.join(config.uploadDir, 'example2.jpg'),
   path.join(config.uploadDir, 'example3.jpg'),
-  path.join(config.uploadDir, 'example4.jpg'),
-  path.join(config.uploadDir, 'example5.jpg'),
-  path.join(config.uploadDir, 'example6.jpg'),
-  path.join(config.uploadDir, 'example7.jpg'),
-  path.join(config.uploadDir, 'example8.jpg'), ];
+  path.join(config.uploadDir, 'example4.jpg')];
 
 function queueAllExamples()
 {
@@ -53,74 +48,6 @@ function enableDebugQueue()
 function isDemoEnabled()
 {
   return demoEnabled;
-}
-
-function startWatchingDir(newFileCallback, fileDeletedCallback, fileChangedCallback)
-{
-  var imagesDir = config.imagesDir;
-  var thumbsDir = config.thumbsDir;
-  console.log("Watching dir " + imagesDir); 
-  console.log("Thumbs will be created in " + thumbsDir);   
-  watch.watchTree(imagesDir, function(f, curr, prev) {
-    if (typeof f == "object" && prev === null && curr === null) 
-    {
-      // Finished walking the tree
-      console.log('Initial scan complete');
-    }
-    else if (prev === null) 
-    {
-      // New file
-      if (path.extname(f) == ".jpg" || path.extname(f) == ".JPG")
-      {
-        console.log('New: ' + f);        
-        deleteThumb(f);        
-        createThumb(f);
-        if (newFileCallback)
-        {
-          newFileCallback(f);
-        }
-      }
-      else
-      {
-        console.log('Ignoring new file ' + f);
-      }
-    } 
-    else if (curr.nlink === 0) 
-    {
-      // file was removed
-      if (path.extname(f) == ".jpg" || path.extname(f) == ".JPG")
-      {
-        console.log('Removed: ' + f);        
-        deleteThumb(f);
-        if (fileDeletedCallback)
-        {
-         fileDeletedCallback(f);
-        }
-      }
-      else
-      {
-        console.log('Ignoring removed file ' + f);
-      }
-    } 
-    else 
-    {
-      // file was changed
-      if (path.extname(f) == ".jpg" || path.extname(f) == ".JPG")
-      {
-        console.log('Changed: ' + f);
-        deleteThumb(f);        
-        createThumb(f);
-        if (fileChangedCallback)
-        {
-          fileChangedCallback(f);
-        }
-      }
-      else
-      {
-        console.log('Ignoring changed file ' + f);
-      }
-    }
-  });
 }
 
 function getExistingUploads(req, res)

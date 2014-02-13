@@ -1,0 +1,185 @@
+body {
+  background-color: #000;
+  overflow: hidden;
+  padding: 0px;
+  margin: 0px;
+}
+#container {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+  z-index: 0;
+}
+#imageName {
+  color: #c0c0c0;
+  text-shadow: 1px 1px #000;
+  text-align: left;
+  font-family: Verdana;
+  font-size: 10px;
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+}
+#rightContainer {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  z-index: 2;
+  font-family: Verdana;
+  color: #c0c0c0;
+  text-align: center;
+  text-shadow: 1px 1px #000;
+  vertical-align: middle;
+  align-content: center;
+  padding: 4px 4px 4px 4px;
+}
+#exifContainer {
+  position: relative;
+}
+.exifBox {
+  border: 1px solid;
+  border-width: 1px;
+  border-radius: 4px;
+  border-style: solid;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  border-color: rgba(255,255,255,0.4);
+  background-color: rgba(0,0,0,0.25);
+  margin: 2px 2px 2px 2px;
+  text-align: center;
+  align-content: center;
+  vertical-align: middle;
+  font-size: 12px;
+}
+#progressBar {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(0,153,255,0.75);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  opacity: 0.5;
+}
+#timerBar {
+  width: 100%;
+  height: 4px;
+  background-color: rgba(0,255,13,0.75);
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  z-index: 5;
+  opacity: 0.5;
+}
+img#main {
+  width: 100%;
+  overflow: hidden;
+  z-index: 2;
+  margin-left: auto;
+  margin-right: auto;
+}
+img#his {
+  width: 256px;
+  height: 158px;
+  position: absolute;
+  bottom: 36px;
+  right: 4px;
+  z-index: 2;
+  opacity: 0.6;
+  border-radius: 8px;
+}
+img#loading {
+  width: 160px;
+  height: 24px;
+  position: absolute;
+  margin-left: -80px;
+  margin-right: auto;
+  margin-top: -12px;
+  margin-bottom: auto;
+  z-index: 5;
+  left: 50%;
+  top: 12px;
+  opacity: 0.6;
+}
+#buttonContainer {
+  position: relative;
+  align-content: center;
+  margin-top: 16px;
+}
+.nevButton {
+  position: relative;
+}
+.nevButtonContent {
+  position: relative;
+  border-style: solid;
+  border-color: rgba(255,255,255,0.4);
+  border-width: 1px;
+  border-radius: 4px;
+  width: 34px;
+  height: 34px;
+  background-color: rgba(0,0,0,0.1);
+  text-align: center;
+  align-content: center;
+  vertical-align: middle;
+  margin: 2px 2px 2px 2px;
+  padding: 0px 0px 0px 0px;
+  display: inline-block;
+  opacity: 0.6;
+}
+[clickableButton=true]:hover {
+  border-color: rgba(255,255,255,0.6);
+  background-color: rgba(255,255,255,0.1);
+  opacity: 0.8;
+}
+.nevButtonText {
+  font-size: small;
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 11px;
+  bottom: 5px;
+  align-content: center;
+  text-align: center;
+  vertical-align: middle;
+  background: none;
+  display: table-cell;
+  pointer-events: none;
+}
+[buttonEnabled=true] {
+  border-color: #51ff00;
+}
+[buttonEnabled=false] {
+  border-color: rgba(255,255,255,0.4);
+}
+#thumbnailContainer {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  opacity: 0.9;
+  z-index: 4;
+  height: 65px;
+  max-width: 100%;
+  max-height: 65px;
+  display: inline-block;
+}
+.thumbnail {
+  height: 64px;
+  border-top: solid #c0c0c0 1px;
+  border-right: solid #c0c0c0 1px;
+}
+.thumbnail:hover {
+  transform: translateY(-32px) scale(2);
+  transition: 0.15s ease-in-out;
+  cursor: pointer;
+}
+.thumbnail:not(:hover) {
+  transition: 0.25s ease-in-out;
+}
+.processing {
+  color: #f00;
+}

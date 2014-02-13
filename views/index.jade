@@ -3,31 +3,32 @@ html(lang="en")
   head
     title single
 
-    link(type="text/css", rel='stylesheet', href='stylesheets/single.css', media='screen')
+    link(type="text/css", rel='stylesheet', href='stylesheets/style.css', media='screen')
     script(type="text/javascript", src="javascripts/jquery-1.10.2.min.js")
     script(type="text/javascript", src="javascripts/jquery.fullscreen.js")
     script(type="text/javascript", src="javascripts/jquery-ui-1.10.3.custom.js")
-    script(type="text/javascript", src="/socket.io/socket.io.js")    
+    script(type="text/javascript", src="/javascripts/ko.js")
+    script(type="text/javascript", src="/socket.io/socket.io.js")
     script(type="text/javascript", src="javascripts/single.js")
+    script(type="text/javascript", src="javascripts/viewmodel.js")
 
     script(type='text/javascript').
       $(document).ready(function() {
-        initializeSingle('#{showRunDemoButton}');
+        var vm = new ViewModel();
+        initializeSingle('#{showRunDemoButton}', vm);
+        ko.applyBindings(vm);
       });
 
   body    
     #container
       #progressBar
       img#main(src='', alt='no image')
-      #imageName imageName
+      #imageName(data-bind='text: displayName') imageName
       img#his(src='', alt='no histogram')
       img#loading(src='loading.gif', alt='loading')
       #rightContainer
-        #exifContainer
-          #exifISO.exifBox ISO
-          #exifAperture.exifBox F
-          #exifShutterSpeed.exifBox S
-          #exifFocalLength.exifBox FL
+        #exifContainer(data-bind='foreach: exifArray')
+          div(data-bind='text: $data').exifBox EXIF
         #buttonContainer
           .nevButton#toggleAutoplayButton
             img#toggleAutoplayImg.nevButtonContent(src='pause.png', alt='pause', clickableButton='true')

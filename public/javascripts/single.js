@@ -1,5 +1,6 @@
 var playbackState = 'play';
 var checkQueueTimeout = 500;
+var viewModel;
 
 var shouldShowLoadingImage = false;
 function getScreenOptimizedImage(imageName, callback)
@@ -23,15 +24,16 @@ function displayImage(imageName)
 {
   shouldShowLoadingImage = true;
   setTimeout(showLoadingImage, 500);
-  var $imageName = $('#imageName');
-  $imageName.text(imageName + ' loading...');
+  viewModel.fileName(imageName);
+  viewModel.isLoadingImage (true);
   var $mainImage = $('img#main');
   
   getScreenOptimizedImage(imageName, function(newImageName) {
     $mainImage.attr('src', newImageName).attr('alt', imageName);
     shouldShowLoadingImage = false;
     $('img#loading').hide();
-    $imageName.text(newImageName);
+    viewModel.imageName(newImageName);
+    viewModel.isLoadingImage(false);    
     if (playbackState == 'play')
     {
       updateQueueStatus();
@@ -149,19 +151,11 @@ function setElementExifData(element, data, pre, post)
 		element.hide();
 	}
 }
-      
-function setExifInfo(exifData)
-{
-    setElementExifData($('#exifISO'), exifData.iso, 'ISO', '');
-    setElementExifData($('#exifAperture'), exifData.aperture, 'f', '');
-    setElementExifData($('#exifShutterSpeed'), exifData.shutterSpeed, '', 's');
-    setElementExifData($('#exifFocalLength'), exifData.focalLength, '', 'mm');        
-}
 
 function getExifInfo(fileName)
 {
-    $.get('api/exif/' + fileName, function(exifData) {
-        setExifInfo(exifData);
+    $.get('api/exifall/' + fileName, function(exifData) {
+        viewModel.setExifArray(exifData);
     });
 }
 
@@ -368,15 +362,16 @@ function setupDemo(showRunDemoButton)
     });
 }
 
-function initializeSingle(showRunDemoButton)
+function initializeSingle(showRunDemoButton, viewModelIn)
 {
-    setupSocket();
-    displayImage('eyefi.gif');
-    displayHistogramImage(null);
-    updateProgressBar(0);
-    attachFullScreenEvent();
-    setupAutoplay();
-    setupDemo(showRunDemoButton);
-    setupHistogram();
-    setupThumbnails();
+  viewModel = viewModelIn;
+  setupSocket();
+  displayImage('eyefi.gif');
+  displayHistogramImage(null);
+  updateProgressBar(0);
+  attachFullScreenEvent();
+  setupAutoplay();
+  setupDemo(showRunDemoButton);
+  setupHistogram();
+  setupThumbnails();
 }
