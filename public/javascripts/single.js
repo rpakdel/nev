@@ -2,7 +2,6 @@ var playbackState = 'play';
 var checkQueueTimeout = 500;
 var viewModel;
 
-var shouldShowLoadingImage = false;
 function getScreenOptimizedImage(imageName, callback)
 {
   var newImageName = imageName;
@@ -22,19 +21,15 @@ function getScreenOptimizedImage(imageName, callback)
 
 function displayImage(imageName)
 {
-  shouldShowLoadingImage = true;
-  setTimeout(showLoadingImage, 500);
+  viewModel.isLoadingImage(true); 
   viewModel.fileName(imageName);
-  viewModel.isLoadingImage (true);
   var $mainImage = $('img#main');
   
   getScreenOptimizedImage(imageName, function(newImageName) {
     $mainImage.attr('src', newImageName).attr('alt', imageName);
-    shouldShowLoadingImage = false;
-    $('img#loading').hide();
     viewModel.imageName(newImageName);
-    viewModel.isLoadingImage(false);    
-    if (playbackState == 'play')
+    viewModel.isLoadingImage(false);
+    if (viewModel.play())
     {
       updateQueueStatus();
       setTimeout(updateQueueStatus, checkQueueTimeout);
@@ -44,7 +39,6 @@ function displayImage(imageName)
 
 function preloadImage(imageName, callback)
 {
-  
   var imgPreload = new Image();
   $(imgPreload).attr({ src: imageName, alt: imageName });
 
@@ -63,49 +57,10 @@ function preloadImage(imageName, callback)
   }
 }
 
-function showLoadingImage()
-{
-  if (shouldShowLoadingImage)
-  {
-    $('img#loading').show();
-  }
-}
-
 function displayImageAndComponents(imageName)
 {
   displayImage(imageName);
   getExifInfo(imageName);
-  getHistogram(imageName);
-}
-
-function getIsHistogramEnabled()
-{
-    var hisVisibleStr = localStorage.getItem('nev.histogram.enable');
-    var hisVisible = true;
-    if (hisVisibleStr !== null)
-    {
-        hisVisible = JSON.parse(hisVisibleStr);
-    }
-    return hisVisible;
-}
-
-function setIsHistogramEnabled(isEnabled)
-{
-    localStorage.setItem('nev.histogram.enable', isEnabled);
-}
-
-function displayHistogramImage(hisImageName)
-{
-    if (hisImageName === null || hisImageName === '')
-    {
-        showHideHistogram(false);
-    }
-    else
-    {
-        var isEnabled = getIsHistogramEnabled();
-        $('#his').attr('src', hisImageName).attr('alt', hisImageName);
-        showHideHistogram(isEnabled);
-    }
 }
 
 function updateProgressBar(percent) 
@@ -159,20 +114,6 @@ function getExifInfo(fileName)
     });
 }
 
-var histogramFileName = null;
-function getHistogram(fileName)
-{
-    histogramFileName = fileName;
-    if (!getIsHistogramEnabled())
-    {
-        return;
-    }    
-    displayHistogramImage('histogram-loading.gif');
-    $.get('api/histogram/' + fileName, function(data) {
-        displayHistogramImage(data.histogramName);        
-    });
-}
-
 function updateQueueStatus()
 {
     $.get('api/queueStatus', setQueueStatus);
@@ -208,7 +149,7 @@ function setupSocket()
 {
     var socket = io.connect();
     socket.on('newFile', function(data) {
-      if (playbackState != "pause")
+      if (viewModel.play())
       {
           displayImageAndComponents(data.fileName);
       }
@@ -224,78 +165,18 @@ function setupSocket()
 function setupHistogram()
 {
     $('img#his').draggable(
-        { 
-            containment: "window",
-            opacity: 0.4,
-            stop: onStopDragHistogram
-        });
+    { 
+      containment: "window",
+      opacity: 0.4,
+      stop: onStopDragHistogram
+    });
     $('#resetHistogramButton').click(resetHistogramPosition);
-    $('#toggleHistogramButton').click(toggleHistogram);
-    loadHistogramPosition();
-}
-
-function toggleHistogram()
-{
-    var isEnabled = getIsHistogramEnabled();
-    isEnabled = !isEnabled;
-    setIsHistogramEnabled(isEnabled);
-    
-    if (isEnabled && histogramFileName !== null)
-    {
-      // load and show the image
-      getHistogram(histogramFileName);
-    }
-    else
-    {
-        showHideHistogram(isEnabled);    
-    }    
-}
-
-function showHideHistogram(show)
-{
-    if (show)
-    {       
-        $('img#his').show('slow');
-        $('#toggleHistogramImg').attr('buttonEnabled', true);
-        $('#resetHistogramButton').show();
-    }
-    else
-    {
-        $('img#his').hide('slow');
-        $('#toggleHistogramImg').attr('buttonEnabled', false);
-        $('#resetHistogramButton').hide();
-    }
 }
 
 function onStopDragHistogram(event, ui)
 {    
     var position = ui.position;
-    localStorage.setItem('nev.histogram.position', JSON.stringify(position));
-}
-
-function loadHistogramPosition()
-{
-    var position = JSON.parse(localStorage.getItem('nev.histogram.position'));
-
-    if (position !== null)
-    {
-        var $imghis =  $('img#his');
-        var $win = $(window);
-
-        if ((position.left + $imghis.width()) > $win.width())
-        {
-            position.left = $win.width - $imghis.width();
-        }
-        if ((position.top + $imghis.height()) > $win.height())
-        {
-            position.top = $win.height() - $imghis.height();
-        }
-
-        $imghis.css({
-            left: + position.left,
-            top: position.top
-        });
-    }
+    viewModel.setHistogramPosition(position);
 }
 
 function resetHistogramPosition()
@@ -309,8 +190,7 @@ function resetHistogramPosition()
 
 function thumbnailOnClick(eventObject)
 {
-    playbackState = "pause";
-    showPlaybackButton();
+    viewModel.play(false);
     var imageName = eventObject.target.attributes.imageName.value;
     displayImageAndComponents(imageName);
 }
@@ -318,39 +198,6 @@ function thumbnailOnClick(eventObject)
 function setupThumbnails()
 {
     $('#thumbnailContainer > img').on('click', thumbnailOnClick);
-}
-
-function showPlaybackButton()
-{
-    if (playbackState == 'play')
-    {
-        //$('#timerBar').show();
-        $('img#toggleAutoplayImg').attr('src', 'pause.png').attr('alt', 'pause');
-    }
-    else
-    {
-        //$('#timerBar').hide();
-        $('img#toggleAutoplayImg').attr('src', 'play.png').attr('alt', 'play');
-    }
-}
-
-function toggleAutoplay()
-{
-    if (playbackState == 'play')
-    {
-        playbackState = 'pause';
-    }
-    else
-    {
-        playbackState = 'play';
-        updateQueueStatus();
-    }
-    showPlaybackButton();
-}
-
-function setupAutoplay()
-{
-  $('#toggleAutoplayButton').click(toggleAutoplay);
 }
 
 function setupDemo(showRunDemoButton)
@@ -367,10 +214,8 @@ function initializeSingle(showRunDemoButton, viewModelIn)
   viewModel = viewModelIn;
   setupSocket();
   displayImage('eyefi.gif');
-  displayHistogramImage(null);
   updateProgressBar(0);
   attachFullScreenEvent();
-  setupAutoplay();
   setupDemo(showRunDemoButton);
   setupHistogram();
   setupThumbnails();

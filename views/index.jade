@@ -24,18 +24,18 @@ html(lang="en")
       #progressBar
       img#main(src='', alt='no image')
       #imageName(data-bind='text: displayName') imageName
-      img#his(src='', alt='no histogram')
-      img#loading(src='loading.gif', alt='loading')
+      img#his(alt='histogram', data-bind='visible: isHistogramVisible, attr: { src: histogramImageName }, style: { top: histogramTop, left: histogramLeft }')
+      img#loading(src='loading.gif', alt='loading', data-bind='visible: isLoadingImage')
       #rightContainer
         #exifContainer(data-bind='foreach: exifArray')
           div(data-bind='text: $data').exifBox EXIF
         #buttonContainer
-          .nevButton#toggleAutoplayButton
-            img#toggleAutoplayImg.nevButtonContent(src='pause.png', alt='pause', clickableButton='true')
+          .nevButton#toggleAutoplayButton(data-bind='click: togglePlayback')
+            img#toggleAutoplayImg.nevButtonContent(data-bind='attr: { src: playButtonIcon, alt: playButtonAlt }', clickableButton='true')
           .nevButton#toggleHistogramButton
-            img#toggleHistogramImg.nevButtonContent(src='histogramButton.png', alt='toggle histogram', clickableButton='true')
+            img#toggleHistogramImg.nevButtonContent(src='histogramButton.png', alt='toggle histogram', clickableButton='true', data-bind='click: toggleHistogramEnabled, css: { buttonEnabled: isHistogramVisible }')
           .nevButton#resetHistogramButton
-            .exifBox Reset
+            .exifBox(data-bind='visible: isResetHistogramVisible, click: resetHistogramPosition') Reset
           #queueLen.exifBox 0
           #demoButton.exifBox push
       //#timerBar
