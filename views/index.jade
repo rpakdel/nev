@@ -37,6 +37,14 @@ html(lang="en")
           .nevButton#resetHistogramButton
             .exifBox(data-bind='visible: isResetHistogramVisible, click: resetHistogramPosition') Reset
           #queueLen.exifBox 0
+          #queueList.exifBox
+            ul.queueList(data-bind='foreach: processQueueNames')
+              li 
+                span.queueListItem(data-bind='text: $data')
+          #queueList.exifBox
+            ul.queueList(data-bind='foreach: readyQueueNames')
+              li 
+                span.queueListItem(data-bind='text: $data')
           #demoButton.exifBox push
       //#timerBar
       #thumbnailContainer

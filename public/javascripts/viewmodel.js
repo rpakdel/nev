@@ -7,6 +7,11 @@
   this.play = ko.observable(true);
   this.histogramState = ko.observable({ enabled: false, position: { top: 36, left: 4 }});
   this.histogramSize = { width: 256, height: 158 };
+  
+
+  this.exifArray = ko.observableArray();
+  this.readyQueueNames = ko.observableArray();
+  this.processQueueNames = ko.observableArray();
     
   this.togglePlayback = function() {
     self.play(!self.play());
@@ -56,8 +61,6 @@
       });
     }
   }, this);
-
-  this.exifArray = ko.observableArray();
 
   this.setExifArray = function(exifData)
   {
@@ -182,4 +185,24 @@
   this.resetHistogramPosition = function() {
     self.setHistogramPosition({ left: 4, top: 36 });
   };
+
+  this.setQueueArrays = function() {
+    $.get('api/queue?namesOnly', function(queues) {
+        self.readyQueueNames.removeAll();
+        var rl = queues.readyQueue.length;
+        for (var r = 0; r < rl; r++) 
+        {
+          self.readyQueueNames.push(queues.readyQueue[r]);
+        }
+
+        self.processQueueNames.removeAll();
+        var pl = queues.processQueue.length;
+        for (var p = 0; p < pl; ++p)
+        {
+          self.processQueueNames.push(queues.processQueue[p]);
+        }
+     });
+  }
+
+  setInterval(this.setQueueArrays, 1000);
 }

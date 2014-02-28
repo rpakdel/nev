@@ -72,10 +72,32 @@ function getQueueStatus(req, res)
 
 function getQueue(req, res)
 {
-  res.json({ 
-    readyQueue: readyQueue,
-    processQueue: processQueue 
-  });
+  var namesOnly = req.query.namesOnly;
+
+  if (namesOnly === undefined)
+  {
+    res.json({ 
+      readyQueue: readyQueue,
+      processQueue: processQueue 
+    });
+  }
+  else
+  {
+    var readyNames = [];
+    for(var i in readyQueue)
+    {
+      readyNames.push(path.basename(readyQueue[i]));
+    }
+    var processNames = [];
+    for(var i in processQueue)
+    {
+      processNames.push(path.basename(processQueue[i]));
+    }
+    res.json({
+      readyQueue: readyNames,
+      processQueue: processNames
+    });
+  }
 }
 
 exports.setup = setup;
