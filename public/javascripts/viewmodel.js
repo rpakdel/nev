@@ -12,6 +12,11 @@
   this.exifArray = ko.observableArray();
   this.readyQueueNames = ko.observableArray();
   this.processQueueNames = ko.observableArray();
+  this.processingNames = ko.observableArray();
+
+  this.processQueueNamesVisible = ko.observable(false);
+  this.readyQueueNamesVisible = ko.observable(false);
+  this.processingNamesVisible = ko.observable(false);
     
   this.togglePlayback = function() {
     self.play(!self.play());
@@ -194,6 +199,7 @@
         {
           self.readyQueueNames.push(queues.readyQueue[r]);
         }
+        self.readyQueueNamesVisible(self.readyQueueNames().length > 0);
 
         self.processQueueNames.removeAll();
         var pl = queues.processQueue.length;
@@ -201,8 +207,18 @@
         {
           self.processQueueNames.push(queues.processQueue[p]);
         }
+        self.processQueueNamesVisible(self.processQueueNames().length > 0);
+
+        self.processingNames.removeAll();
+        var ql = queues.processingImages.length;
+        for (var q = 0; q < ql; ++q)
+        {
+          self.processingNames.push(queues.processingImages[q]);
+        }
+        self.processingNamesVisible(self.processingNames().length > 0);
+
      });
-  }
+  }  
 
   setInterval(this.setQueueArrays, 1000);
 }

@@ -5,6 +5,7 @@ var config = require('../config.js');
 
 var readyQueue = [];
 var processQueue = [];
+var processingImages = [];
 
 function checkReadyQueueAndEmit()
 {
@@ -12,27 +13,25 @@ function checkReadyQueueAndEmit()
   {
     return;
   }
-
+  
   var f = readyQueue.shift();
   emitNewFileReady(f);
 }
 
-var processingImage = false;
 function checkProcessQueueAndProcess()
 {
   // check if something is available for processing
   // do not process more than one image at once if requested
   if (processQueue.length === 0 || 
-     (config.processOnlyOneImage && processingImage))
+     (config.processOnlyOneImage && processingImages.length >= 1))
   {
     return;
   }
 
-  processingImage = true;
-
   var f = processQueue.shift();
+  processingImages.push(f);
   img.processFile(f, function(err) {
-    processingImage = false;
+    processingImages.splice(processingImages.indexOf(f), 1);
     if (!err)
     {
       readyQueue.push(f);
@@ -66,7 +65,7 @@ function getQueueStatus(req, res)
   res.json({ 
     processQueueLength: processQueue.length,
     readyQueueLength: readyQueue.length,
-    processing: processingImage
+    processingLength: processingImages.length
   });
 }
 
@@ -78,7 +77,8 @@ function getQueue(req, res)
   {
     res.json({ 
       readyQueue: readyQueue,
-      processQueue: processQueue 
+      processQueue: processQueue,
+      processingImages: processingImages
     });
   }
   else
@@ -93,9 +93,16 @@ function getQueue(req, res)
     {
       processNames.push(path.basename(processQueue[i]));
     }
+    var processingNames = [];
+    for(var i in processingImages)
+    {
+      processingNames.push(path.basename(processingImages[i]));
+    }
+
     res.json({
       readyQueue: readyNames,
-      processQueue: processNames
+      processQueue: processNames,
+      processingImages: processingNames
     });
   }
 }

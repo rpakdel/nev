@@ -184,15 +184,13 @@ img#loading {
   color: #f00;
 }
 ul.queueList {
-  padding: 0px;
-  padding-left: 1px;
+  padding: 1px;
   margin: 0px;
-  list-style-type: circle;
+  list-style-type: none;
   list-style-position: inside;
   font-size: x-small;
   text-align: left;
 }
 .queueListItem {
   position: relative;
-  left: -5px;
 }
