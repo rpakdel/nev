@@ -15,20 +15,26 @@ html(lang="en")
     script(type='text/javascript').
       $(document).ready(function() {
         var vm = new ViewModel();
-        initializeSingle('#{showRunDemoButton}', vm);
+        var v = #{showRunDemoButton};
+        vm.pushExamplesButtonVisible(v);
+        initializeSingle(vm);
         ko.applyBindings(vm);
       });
 
   body    
     #container
       #progressBar
+
       img#main(src='', alt='no image')
       #imageName(data-bind='text: displayName') imageName
       img#his(alt='histogram', data-bind='visible: isHistogramVisible, attr: { src: histogramImageName }, style: { top: histogramTop, left: histogramLeft }')
       img#loading(src='loading.gif', alt='loading', data-bind='visible: isLoadingImage')
+
       #rightContainer
+
         #exifContainer(data-bind='foreach: exifArray')
           div(data-bind='text: $data').exifBox EXIF
+
         #buttonContainer
           .nevButton#toggleAutoplayButton(data-bind='click: togglePlayback')
             img#toggleAutoplayImg.nevButtonContent(data-bind='attr: { src: playButtonIcon, alt: playButtonAlt }', clickableButton='true')
@@ -36,19 +42,24 @@ html(lang="en")
             img#toggleHistogramImg.nevButtonContent(src='histogramButton.png', alt='toggle histogram', clickableButton='true', data-bind='click: toggleHistogramEnabled, css: { buttonEnabled: isHistogramVisible }')
           .nevButton#resetHistogramButton
             .exifBox(data-bind='visible: isResetHistogramVisible, click: resetHistogramPosition') Reset
-          #queueLen.exifBox 0
-          #queueList.exifBox(data-bind='visible: readyQueueNamesVisible') Ready
+
+          #queueList.exifBox(data-bind='visible: readyQueueNamesVisible') Ready: 
+            span(data-bind='text: readyQueueNames().length') 0
             ul.queueList(data-bind='foreach: readyQueueNames')
-              li 
+              li
                 span.queueListItem(data-bind='text: $data')
-          #queueList.exifBox(data-bind='visible: processingNamesVisible') Processing
+
+          #queueList.exifBox(data-bind='visible: processingNamesVisible') Processing: 
+            span(data-bind='text: processingNames().length') 0
             ul.queueList(data-bind='foreach: processingNames')
-              li 
+              li
                 span.queueListItem(data-bind='text: $data')
-          #queueList.exifBox(data-bind='visible: processQueueNamesVisible') Queue
+
+          #queueList.exifBox(data-bind='visible: processQueueNamesVisible') Queue: 
+            span(data-bind='text: processQueueNames().length') 0
             ul.queueList(data-bind='foreach: processQueueNames')
               li 
                 span.queueListItem(data-bind='text: $data')
-          #demoButton.exifBox push
-      //#timerBar
+          #demoButton.exifBox(data-bind='visible: pushExamplesButtonVisible, click: pushExamples') Push Ex.
+
       #thumbnailContainer

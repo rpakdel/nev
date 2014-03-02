@@ -29,11 +29,6 @@ function displayImage(imageName)
     $mainImage.attr('src', newImageName).attr('alt', imageName);
     viewModel.imageName(newImageName);
     viewModel.isLoadingImage(false);
-    if (viewModel.play())
-    {
-      updateQueueStatus();
-      setTimeout(updateQueueStatus, checkQueueTimeout);
-    }
   });
 }
 
@@ -60,7 +55,7 @@ function preloadImage(imageName, callback)
 function displayImageAndComponents(imageName)
 {
   displayImage(imageName);
-  getExifInfo(imageName);
+  //getExifInfo(imageName);
 }
 
 function updateProgressBar(percent) 
@@ -77,13 +72,6 @@ function updateProgressBar(percent)
     }
 }
 
-function setQueueStatus(queueStatus)
-{
-  var $queueLen = $('#queueLen');
-  $queueLen.text('P:' + queueStatus.processQueueLength + " R:" + queueStatus.readyQueueLength );
-  $queueLen.toggleClass('processing', queueStatus.processing);
-}
-      
 function attachFullScreenEvent()
 {
     if($.support.fullscreen) 
@@ -105,18 +93,6 @@ function setElementExifData(element, data, pre, post)
 	{
 		element.hide();
 	}
-}
-
-function getExifInfo(fileName)
-{
-    $.get('api/exifall/' + fileName, function(exifData) {
-        viewModel.setExifArray(exifData);
-    });
-}
-
-function updateQueueStatus()
-{
-    $.get('api/queueStatus', setQueueStatus);
 }
 
 function addImageThumbnail(imageName)
@@ -154,7 +130,7 @@ function setupSocket()
           displayImageAndComponents(data.fileName);
       }
       // next notification is in 5s
-      addImageThumbnail(data.fileName);      
+      addImageThumbnail(data.fileName);
     });
 
     socket.on('uploadingImage', function(data) {
@@ -170,22 +146,12 @@ function setupHistogram()
       opacity: 0.4,
       stop: onStopDragHistogram
     });
-    $('#resetHistogramButton').click(resetHistogramPosition);
 }
 
 function onStopDragHistogram(event, ui)
 {    
     var position = ui.position;
     viewModel.setHistogramPosition(position);
-}
-
-function resetHistogramPosition()
-{
-  localStorage.removeItem('nev.histogram.position');
-  $('img#his').css({
-      right:'4px',
-      bottom:'4px'
-  });
 }
 
 function thumbnailOnClick(eventObject)
@@ -200,23 +166,13 @@ function setupThumbnails()
     $('#thumbnailContainer > img').on('click', thumbnailOnClick);
 }
 
-function setupDemo(showRunDemoButton)
-{
-    $('#demoButton').click(function() {
-      $.get('api/pushExamples', function() {
-        updateQueueStatus(); 
-      });
-    });
-}
-
-function initializeSingle(showRunDemoButton, viewModelIn)
+function initializeSingle(viewModelIn)
 {
   viewModel = viewModelIn;
   setupSocket();
   displayImage('eyefi.gif');
   updateProgressBar(0);
   attachFullScreenEvent();
-  setupDemo(showRunDemoButton);
   setupHistogram();
   setupThumbnails();
 }

@@ -1,10 +1,14 @@
 ﻿var ViewModel = function() {
   var self = this;
+  // the name of the file to display
   this.fileName = ko.observable('');
+  // the actual screen optimized image that is displayed
   this.imageName = ko.observable('');
+
   this.histogramImageName = ko.observable('');
   this.isLoadingImage = ko.observable(false);
   this.play = ko.observable(true);
+  this.pushExamplesButtonVisible = ko.observable(false);
   this.histogramState = ko.observable({ enabled: false, position: { top: 36, left: 4 }});
   this.histogramSize = { width: 256, height: 158 };
   
@@ -45,23 +49,26 @@
   
 
   this.displayName = ko.computed(function() {
-    if (self.isLoadingImage()) 
+    // if image is still loading, show file name
+    if (self.isLoadingImage())
     {
       return self.fileName() + ' loading ... ';
     }
     
+    // if screen optimized image exist, show it
     if (self.imageName())
     {
       return self.imageName();
     }
-      
+
+    // show the file name
     return self.fileName();
   }, this);
 
   this.computeExifArray = ko.computed(function() {
-    if (self.fileName)
+    if (self.fileName())
     {
-      $.get('api/exifall/' + self.fileName, function(exifData) {
+      $.get('api/exifall/' + self.fileName(), function(exifData) {
         self.setExifArray(exifData);
       });
     }
@@ -218,7 +225,13 @@
         self.processingNamesVisible(self.processingNames().length > 0);
 
      });
-  }  
+  }
 
-  setInterval(this.setQueueArrays, 1000);
+  this.pushExamples = function () {
+    $.get('api/pushExamples', function () {
+      self.setQueueArrays();
+    });
+  }
+
+  setInterval(this.setQueueArrays, 3000);
 }
