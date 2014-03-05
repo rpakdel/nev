@@ -27,21 +27,13 @@ function setup()
 
   // show progress bar as image is being uploaded
   var progressBar = require('progress-bar').create(process.stdout);
-  var progressEmitPaused = false;
   eyefiServer.on('uploadProgress', function(progressData) {
-    var br = progressData.received || 0;
-    var be = progressData.expected || 0;
-    var pct = (100*br/be).toFixed(2)/100.0;
+    var bytesReceivd = progressData.received || 0;
+    var bytedExpected = progressData.expected || 0;
+    var pct = (bytesReceived / bytesExpected) * 100.0;
 
-    progressBar.update(pct);
-    if(!progressEmitPaused  || br==be) 
-    {
-      sock.emit('uploadingImage', { percent: (pct * 100.0).toFixed(2) });
-      progressEmitPaused = true;
-      setTimeout(function() { 
-        progressEmitPaused = false; 
-      }, 500);
-    }
+    progressBar.update((pct/100.0).toFixed(2));
+    sock.emitUploadingImage(pct);
   });
 }
 

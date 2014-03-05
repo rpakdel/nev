@@ -21,6 +21,18 @@ function emit(event, data)
     io.sockets.emit(event, data);
 }
 
+var emitUploadingImagePaused = false;
+function emitUploadingImage(percent)
+{
+  // slow down emit to once every 500ms
+  if (!emitUploadingImagePaused)
+  {
+    io.sockets.emit('uploadingImage', { percent: percent.toFixed(2) });
+    emitUploadingImagePaused = true;
+    setTimeout(function() { emitUploadingImagePaused = false; }, 1000);
+  }
+}
+
 function on(event, callback)
 {
     io.sockets.on(event, callback);
@@ -33,7 +45,21 @@ function emitNewFile(baseName)
   });
 }
 
+var per = 0;
+function  fakeUploadImage() 
+{
+    emitUploadingImage(per);
+    per = per + 10;
+    if (per > 100)
+    {
+      per = 0;
+    }
+}
+
+setInterval(fakeUploadImage, 100);
+
 exports.emit = emit;
 exports.on = on;
 exports.emitNewFile = emitNewFile;
+exports.emitUploadingImage = emitUploadingImage;
 exports.setup = setup;

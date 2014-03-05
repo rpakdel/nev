@@ -4,23 +4,41 @@
   this.fileName = ko.observable('');
   // the actual screen optimized image that is displayed
   this.imageName = ko.observable('');
-
-  this.histogramImageName = ko.observable('');
+  
   this.isLoadingImage = ko.observable(false);
   this.play = ko.observable(true);
+
+  // demo
   this.pushExamplesButtonVisible = ko.observable(false);
+
+  // histogram
+  this.histogramImageName = ko.observable('');
   this.histogramState = ko.observable({ enabled: false, position: { top: 36, left: 4 }});
   this.histogramSize = { width: 256, height: 158 };
   
-
+  // exif
   this.exifArray = ko.observableArray();
+  // queues
   this.readyQueueNames = ko.observableArray();
   this.processQueueNames = ko.observableArray();
   this.processingNames = ko.observableArray();
-
   this.processQueueNamesVisible = ko.observable(false);
   this.readyQueueNamesVisible = ko.observable(false);
   this.processingNamesVisible = ko.observable(false);
+
+  // eyefi
+  this.eyefiUploadProgressPercent = ko.observable(0.0);
+  this.eyefiUploadProgressBarWidth = ko.computed(function() {
+    return self.eyefiUploadProgressPercent() * $(window).width() / 100.0;
+  }, this);
+  this.eyefiUploadProgressBarVisible = ko.computed(function() {
+    if (self.eyefiUploadProgressPercent() === 0.0 || self.eyefiUploadProgressPercent() === 100.0)
+    {
+      return false;
+    }
+
+    return true;
+  }, this);
     
   this.togglePlayback = function() {
     self.play(!self.play());
@@ -231,6 +249,68 @@
     $.get('api/pushExamples', function () {
       self.setQueueArrays();
     });
+  }
+
+  this.loadImage = function (imageName)
+  {
+    self.isLoadingImage(true);
+    self.loadImageHelper(imageName, function () {
+      self.imageName(imageName);
+      self.isLoadingImage(false);
+    });
+  }
+  
+  
+  this.loadImageHelper = function (imageName, callback)
+  {
+    var imgPreload = new Image();
+    $(imgPreload).attr({ src: imageName, alt: imageName });
+
+    // check if the image is already loaded (cached)
+    if (imgPreload.complete || imgPreload.readyState === 4) {
+      // image loaded
+      callback();
+    }
+    else {
+      // go fetch the image
+      $(imgPreload).load(function (response, status, xhr) {
+        callback();
+      });
+    }
+  }
+
+  this.displayImage = function(fName, optimize)
+  {
+    // set the name of the file we will be displayed
+    self.fileName(fName);
+
+    // optionally optimize the size of the image
+    if (optimize)
+    {
+      self.getScreenOptimizedImage(fName, function (newImageName) {
+        self.loadImage(newImageName);
+      });
+    }
+    else
+    {
+      self.loadImage(fName);
+    }
+  }
+
+  this.getScreenOptimizedImage = function (fName, callback)
+  {
+    var newImageName = fName;
+    $.get(
+      'api/optimized/' + fName + '/' + $(window).width() + '/' + $(window).height(),
+      function (optimizedData) {
+        $.get('api/resize/' + fName + '/' + optimizedData.scale,
+        function (resizeResult) {
+          if (resizeResult.success) {
+            newImageName = resizeResult.imageName;
+          }
+          callback(newImageName);
+        });
+      });
   }
 
   setInterval(this.setQueueArrays, 3000);

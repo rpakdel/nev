@@ -23,9 +23,9 @@ html(lang="en")
 
   body    
     #container
-      #progressBar
+      #progressBar(data-bind='visible: eyefiUploadProgressBarVisible, style: { width: eyefiUploadProgressBarWidth}')
 
-      img#main(src='', alt='no image')
+      img#main(data-bind='attr: { src: imageName, alt: imageName }')
       #imageName(data-bind='text: displayName') imageName
       img#his(alt='histogram', data-bind='visible: isHistogramVisible, attr: { src: histogramImageName }, style: { top: histogramTop, left: histogramLeft }')
       img#loading(src='loading.gif', alt='loading', data-bind='visible: isLoadingImage')
