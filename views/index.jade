@@ -23,8 +23,8 @@ html(lang="en")
 
   body    
     #container
-      #progressBar(data-bind='visible: eyefiUploadProgressBarVisible, style: { width: eyefiUploadProgressBarWidth}')
-
+      #progressBar(data-bind='progressBar: eyefiUploadProgressPercent()')
+      
       img#main(data-bind='attr: { src: imageName, alt: imageName }')
       #imageName(data-bind='text: displayName') imageName
       img#his(alt='histogram', data-bind='visible: isHistogramVisible, attr: { src: histogramImageName }, style: { top: histogramTop, left: histogramLeft }')

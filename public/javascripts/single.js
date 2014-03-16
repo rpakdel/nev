@@ -2,20 +2,6 @@ var playbackState = 'play';
 var checkQueueTimeout = 500;
 var viewModel;
 
-function updateProgressBar(percent) 
-{
-    if (percent === 0.0 || percent === 100.0)
-    {
-        $('#progressBar').hide();
-    }
-    else
-    {
-        var progressBarWidth = percent * $(window).width() / 100.0;
-        $('#progressBar').animate({ width: progressBarWidth }, 250);
-        $('#progressBar').show();
-    }
-}
-
 function attachFullScreenEvent()
 {
     if($.support.fullscreen) 
@@ -77,8 +63,8 @@ function setupSocket()
       addImageThumbnail(data.fileName);
     });
 
-    socket.on('uploadingImage', function(data) {
-        updateProgressBar(data.percent);
+    socket.on('uploadingImage', function (data) {
+      viewModel.eyefiUploadProgressPercent(data.percent);
     });
 }
 
@@ -115,7 +101,6 @@ function initializeSingle(viewModelIn)
   viewModel = viewModelIn;
   setupSocket();
   viewModel.displayImage('eyefi.gif', false);
-  updateProgressBar(0);
   attachFullScreenEvent();
   setupHistogram();
   setupThumbnails();

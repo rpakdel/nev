@@ -1,4 +1,24 @@
-﻿var ViewModel = function() {
+﻿var prevProgressBarValue = 0;
+ko.bindingHandlers.progressBar = {
+    update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+      var v = valueAccessor();
+      if (v === 0.0 || v === 100.0) {
+        $(element).hide();
+      }
+      else {        
+        $(element).show();
+        if (v < prevProgressBarValue) {
+          $(element).css({ width: v + '%' });
+        }
+        else {
+          $(element).animate({ width: v + '%' }, 500);  // progress bar events are every 500ms
+        }
+      }
+      prevProgressBarValue = v;
+    }
+  }
+
+var ViewModel = function() {
   var self = this;
   // the name of the file to display
   this.fileName = ko.observable('');
@@ -28,18 +48,6 @@
 
   // eyefi
   this.eyefiUploadProgressPercent = ko.observable(0.0);
-  this.eyefiUploadProgressBarWidth = ko.computed(function() {
-    return self.eyefiUploadProgressPercent() * $(window).width() / 100.0;
-  }, this);
-  this.eyefiUploadProgressBarVisible = ko.computed(function() {
-    if (self.eyefiUploadProgressPercent() === 0.0 || self.eyefiUploadProgressPercent() === 100.0)
-    {
-      return false;
-    }
-
-    return true;
-  }, this);
-    
   this.togglePlayback = function() {
     self.play(!self.play());
   }

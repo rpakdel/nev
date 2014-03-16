@@ -29,7 +29,7 @@ function emitUploadingImage(percent)
   {
     io.sockets.emit('uploadingImage', { percent: percent.toFixed(2) });
     emitUploadingImagePaused = true;
-    setTimeout(function() { emitUploadingImagePaused = false; }, 1000);
+    setTimeout(function() { emitUploadingImagePaused = false; }, 500);
   }
 }
 
@@ -56,7 +56,7 @@ function  fakeUploadImage()
     }
 }
 
-setInterval(fakeUploadImage, 100);
+setInterval(fakeUploadImage, 250);
 
 exports.emit = emit;
 exports.on = on;
