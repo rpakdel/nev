@@ -65,6 +65,7 @@ function setupSocket()
 
     socket.on('uploadingImage', function (data) {
       viewModel.eyefiUploadProgressPercent(data.percent);
+      //viewModel.eyefiUploadProgressPercent(100);
     });
 }
 

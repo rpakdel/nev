@@ -46,17 +46,17 @@ function emitNewFile(baseName)
 }
 
 var per = 0;
-function  fakeUploadImage() 
+function fakeUploadImage() 
 {
     emitUploadingImage(per);
-    per = per + 10;
+    per = per + 2;
     if (per > 100)
     {
       per = 0;
     }
 }
 
-setInterval(fakeUploadImage, 250);
+//setInterval(fakeUploadImage, 250);
 
 exports.emit = emit;
 exports.on = on;

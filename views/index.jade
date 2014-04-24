@@ -23,7 +23,7 @@ html(lang="en")
 
   body    
     #container
-      #progressBar(data-bind='progressBar: eyefiUploadProgressPercent()')
+      
       
       img#main(data-bind='attr: { src: imageName, alt: imageName }')
       #imageName(data-bind='text: displayName') imageName
@@ -61,5 +61,10 @@ html(lang="en")
               li 
                 span.queueListItem(data-bind='text: $data')
           #demoButton.exifBox(data-bind='visible: pushExamplesButtonVisible, click: pushExamples') Push Ex.
+
+          #EyeFi.exifBox(data-bind='visible: isEyeFiConnected')            
+            span(data-bind='text: eyeFiUploadingImage') Eye-Fi
+            #progressBarContainer
+              #progressBar(data-bind='progressBar: eyefiUploadProgressPercent()')
 
       #thumbnailContainer
