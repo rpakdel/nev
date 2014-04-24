@@ -8,9 +8,9 @@
     "email": ""
   },
   "dependencies": {
-    "express": "3.4.4",
-    "jade": "*",
-    "stylus": "*",
+    "express": "~3.4.4",
+    "jade": "~1.3.1",
+    "stylus": "~0.43.0",
     "socket.io": "~0.9.16",
     "eyefi": "~0.1.2",
     "exif2": "0.0.1",

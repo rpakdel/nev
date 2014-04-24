@@ -2,17 +2,11 @@
 ko.bindingHandlers.progressBar = {
     update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
       var v = valueAccessor();
-      if (v === 0.0 || v === 100.0) {
-        $(element).hide();
+      if (v < prevProgressBarValue) {
+        $(element).css({ width: v + '%' });
       }
-      else {        
-        $(element).show();
-        if (v < prevProgressBarValue) {
-          $(element).css({ width: v + '%' });
-        }
-        else {
-          $(element).animate({ width: v + '%' }, 500);  // progress bar events are every 500ms
-        }
+      else {
+        $(element).animate({ width: v + '%' }, 500);  // progress bar events are every 500ms
       }
       prevProgressBarValue = v;
     }
@@ -47,11 +41,15 @@ var ViewModel = function() {
   this.processingNamesVisible = ko.observable(false);
 
   // eyefi
+  this.isEyeFiConnected = ko.observable(false);
+  this.eyeFiUploadingImage = ko.observable('');
   this.eyefiUploadProgressPercent = ko.observable(0.0);
   this.togglePlayback = function() {
     self.play(!self.play());
   }
 
+  
+  
   this.playButtonIcon = ko.computed(function() {
     // if we're paused, show play icon
     if (!self.play())
@@ -321,5 +319,13 @@ var ViewModel = function() {
       });
   }
 
+  this.checkEyeFiStatus = function() {
+    $.get('/api/eyefi', function(eyeFiData) {
+      self.isEyeFiConnected(eyeFiData.eyefiConnected);
+      self.eyeFiUploadingImage(eyeFiData.currentUploadImage);
+    });
+  }
+
   setInterval(this.setQueueArrays, 3000);
+  setInterval(this.checkEyeFiStatus, 1000);
 }
