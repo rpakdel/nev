@@ -1,0 +1,3 @@
+[submodule "node-eyefi"]
+	path = node-eyefi
+	url = https://github.com/rpakdel/node-eyefi.git
