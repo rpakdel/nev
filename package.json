@@ -1,6 +1,6 @@
 {
   "name": "nev",
-  "version": "0.5",
+  "version": "0.5.0",
   "description": "Node.js Eye-Fi Viewer",
   "main": "app.js",
   "author": {
@@ -12,12 +12,17 @@
     "url": "https://github.com/rpakdel/nev.git"
   },
   "dependencies": {
-    "express": "~3.5",
+    "express": "~4",
+    "body-parser": "~1.0.2",
+    "serve-favicon": "~2",
+    "method-override": "1",
+    "morgan": "~1",
+    "errorhandler": "~1",
     "jade": "~1.3",
-    "stylus": "~0.43",
+    "stylus": "~0.43.1",
     "socket.io": "~0.9",
     "exif2": "0.0.1",
-    "gm": "~1.14",
+    "gm": "~1.14.2",
     "network-address": "0.0.4",
     "progress-bar": "~0.1"
   }

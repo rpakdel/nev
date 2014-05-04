@@ -1,4 +1,9 @@
 var express = require('express');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var errorHandler = require('errorhandler');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
@@ -23,23 +28,27 @@ app.set('port', process.env.PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(express.logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded());
-app.use(express.methodOverride());
-app.use(app.router);
+var env = process.env.NODE_ENV || 'development';
+if ('development' == env) {
+  app.use(errorHandler());
+  app.use(logger('dev'))
+}
+else {
+  app.use(logger());
+}
+
+app.use(bodyParser());
+app.use(methodOverride());
 app.use(require('stylus').middleware(config.publicDir));
 
 app.use(express.static(config.imagesDir));
 app.use(express.static(config.uploadDir));
 app.use(express.static(config.artefactsDir));
 app.use(express.static(config.publicDir));
-app.use(express.favicon('favicon.ico'));
+app.use(favicon(path.join(config.imagesDir, 'favicon.ico')));
 
 // development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
+
 
 app.get('/', routes.index);
 app.get('/api/uploads', img.getExistingUploads);
