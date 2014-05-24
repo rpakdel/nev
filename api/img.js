@@ -3,7 +3,7 @@ var config = require('../config.js');
 var path = require('path');
 var exif = require('exif2');
 var exec = require('child_process').exec;
-var fs = require('fs');
+var fs = require('fs-extra');
 var gm = require('gm');
 var imgQ = require('./imgQ.js');
 
@@ -16,58 +16,58 @@ var exampleFiles = [
   path.join(config.uploadDir, 'example2.jpg'),
   path.join(config.uploadDir, 'example3.jpg'),
   path.join(config.uploadDir, 'example4.jpg')];
+  path.join(config.uploadDir, 'example5.jpg')];
 
-function queueAllExamples()
-{
+function copyExampleToUploadDir(exampleFile, callback) {
+  fs.copy(exampleFile, config.uploadDir, function(err) {
+    if (err) {
+      console.log('Failed to copy ' + exampleFile + ' to ' + config.uploadDir + ": " + err);
+    } else {
+      callback();
+    }
+  });
+}
+
+function queueAllExamples()  {
   console.log('Queueing all example files.');
-  for (var i in exampleFiles)
-  {
-    imgQ.pushNewFile(exampleFiles[i]);
+  for (var i in exampleFiles) {
+    copyExampleToUploadDir(exampleFiles[i], function() {
+      imgQ.pushNewFile(exampleFiles[i]);
+    });
   }
 }
 
-function queueNextExample()
-{
+function queueNextExample() {
     imgQ.pushNewFile(exampleFiles[exampleIndex]);
     exampleIndex++;
-    if (exampleIndex >= exampleFiles.length) 
-    { 
+    if (exampleIndex >= exampleFiles.length) { 
       exampleIndex = 0; 
     }
 }
 
 var demoEnabled = false;
-function enableDebugQueue()
-{
-  if (!demoEnabled)
-  {
+function enableDebugQueue() {
+  if (!demoEnabled) {
     demoEnabled = true;    
   }
 }
 
-function isDemoEnabled()
-{
+function isDemoEnabled() {
   return demoEnabled;
 }
 
-function getExistingUploads(req, res)
-{
+function getExistingUploads(req, res) {
   fs.readdir(config.uploadDir, function(err, files) {
-    if (err)
-    {
+    if (err) {
       console.log('err ' + err);
       res.json(err);
-    }
-    else
-    {      
+    } else {
       var uploads = [];
-      for(var i in files)
-      {        
+      for(var i in files) {        
         var imageName = files[i];
         if (imageName.indexOf('_THUMB') == -1 &&
             imageName.indexOf('_HIS') == -1 &&
-            imageName.indexOf('artefacts') == -1)
-        {
+            imageName.indexOf('artefacts') == -1) {
           var stats = fs.statSync(path.join(config.uploadDir, imageName));
           // use same JSON as onNewFile()
           var s = {
@@ -83,39 +83,34 @@ function getExistingUploads(req, res)
   });
 }
 
-function getSizeName(f, scale)
-{
+function getSizeName(f, scale) {
   var extname = path.extname(f);
   var filename = path.basename(f, extname);
   var sizeName = filename + '_' + scale + extname;
   return sizeName;
 }
 
-function getSizePath(f, size)
-{
+function getSizePath(f, size) {
   var sizeName = getSizeName(f, size);
   var sizePath = path.join(config.artefactsDir, sizeName);
   return sizePath;
 }
 
 
-function getThumbName(f)
-{
+function getThumbName(f) {
   var extname = path.extname(f);
   var filename = path.basename(f, extname);
   var thumbName = filename + '_THUMB' + extname;
   return thumbName;
 }
 
-function getThumbPath(f)
-{
+function getThumbPath(f) {
   var thumbName = getThumbName(f);
   var thumbPath = path.join(config.artefactsDir, thumbName);
   return thumbPath;
 }
 
-function getHisName(f)
-{
+function getHisName(f) {
   var extname = path.extname(f);
   var filename = path.basename(f, extname);
   var hisName = filename + '_HIS' + extname;
@@ -123,36 +118,31 @@ function getHisName(f)
   return hisName;
 }
 
-function getHisPath(f)
-{
+function getHisPath(f) {
   var hisName = getHisName(f);
   var hisPath = path.join(config.artefactsDir, hisName);
   return hisPath;
 }
 
-function getMiffName(f)
-{
+function getMiffName(f) {
   var extname = path.extname(f);
   var filename = path.basename(f, extname);
   var miffname = filename + '.miff';
   return miffname;
 }
 
-function getMiffPath(f)
-{
+function getMiffPath(f) {
   var miffName = getMiffName(f);
   var miffPath = path.join(config.artefactsDir, miffName);
   return miffPath;  
 }
 
-function createResizedImage(f, scale, callback)
-{
+function createResizedImage(f, scale, callback) {
   var sizeName = getSizeName(f, scale);
   var sizePath = getSizePath(f, scale);
 
   gm(f).size(function (err, size) {
-    if (!err)
-    {
+    if (!err) {
         console.log('> Creating resized image ' + sizeName);
         var newW = size.width * scale;
         var newH = size.height * scale;
@@ -162,14 +152,11 @@ function createResizedImage(f, scale, callback)
     
         var resizeChildProcess = exec(resizeCommand, function (error, stdout, stderr) {
             //console.log('> Resize process stdout: ' + stdout);
-            if (error !== null) 
-            {
+            if (error !== null) {
                 console.log('! Resize process exec error: ' + error);
                 console.log('! Resize process stderr: ' + stderr);
                 callback(error);
-            }
-            else
-            {
+            } else {
                callback(null);
             }
         });
@@ -181,25 +168,20 @@ function createResizedImage(f, scale, callback)
   });
 }
 
-function createResizedImageIfNotExisting(f, scale, callback)
-{
+function createResizedImageIfNotExisting(f, scale, callback) {
   var sizeName = getSizeName(f, scale);
   var sizePath = getSizePath(f, scale);
 
   fs.exists(sizePath, function(exists) {
-    if (exists)
-    {
+    if (exists) {
       callback(null);
-    }
-    else
-    {
+    } else {
       createResizedImage(f, scale, callback);
     }
   });
 }
 
-function createThumbnail(f, callback)
-{
+function createThumbnail(f, callback) {
   var thumbName = getThumbName(f);
   var thumbPath = getThumbPath(f);
   
@@ -210,23 +192,18 @@ function createThumbnail(f, callback)
     
   var resizeChildProcess = exec(resizeCommand, function (error, stdout, stderr) {    
     //console.log('> Resize process stdout: ' + stdout);
-    if (error !== null) 
-    {
+    if (error !== null) {
       console.log('! Resize process exec error: ' + error);
       console.log('! Resize process stderr: ' + stderr);
       callback(error);
-    }
-    else
-    {
+    } else {
       callback(null);
     }
   });
 }
 
-function getOSCommandSep()
-{
-    switch(process.platform)
-    {
+function getOSCommandSep() {
+    switch(process.platform) {
         case 'win32':
           return ' && ';
 
@@ -235,8 +212,7 @@ function getOSCommandSep()
     }
 }
 
-function createThumbHistogram(thumbPath, callback)
-{
+function createThumbHistogram(thumbPath, callback) {
   var hisName = getHisName(thumbPath);
   var hisPath = getHisPath(thumbPath);
   var miffPath = getMiffPath(thumbPath);
@@ -250,52 +226,41 @@ function createThumbHistogram(thumbPath, callback)
     'gm convert -strip ' + miffPath + ' ' + hisPath;
   var child = exec(hisCommand, function (error, stdout, stderr) {
     //console.log(' Histogram process stdout: ' + stdout);
-    if (fs.existsSync(miffPath))
-    {
+    if (fs.existsSync(miffPath)) {
       fs.unlinkSync(miffPath);
     }
-    if (error !== null) 
-    {
+
+    if (error !== null) {
       console.log('! Histogram process exec error: ' + error);
       console.log('! Histogram process stderr: ' + stderr);
       callback(error);
-    }
-    else
-    {
+    } else {
       callback(null);
     }
   });
 }
 
-function createHistogramIfNotExisting(f, callback)
-{
+function createHistogramIfNotExisting(f, callback) {
   var thumbPath = getThumbPath(f);
   var hisPath = getHisPath(thumbPath);
 
   fs.exists(hisPath, function(exists) {
-    if (!exists)
-    {
+    if (!exists) {
       createHistogram(f, callback);
-    }
-    else
-    {
+    } else {
       callback(null);
     }
   });
 }
 
-function createHistogram(f, callback)
-{
+function createHistogram(f, callback) {
   var thumbPath = getThumbPath(f);
   
   createThumbnail(f, function(thumbError) {
-    if (thumbError)
-    {
+    if (thumbError) {
       console.log('! failed to create thumbnail.');
       callback(thumbError);
-    }
-    else
-    {
+    } else {
       createThumbHistogram(thumbPath, function(hisError) {
         callback(hisError);
       });
@@ -304,34 +269,26 @@ function createHistogram(f, callback)
 }
 
 var focalLengthRegExp = /[\d\.]+/i;
-function getExifData(f, result, callback)
-{
+function getExifData(f, result, callback) {
   exif(f, function(err, exifData) {
-    if (err)
-    {
+    if (err) {
       console.log('! EXIF Error: ' + err.message);
       callback(err);
-    }
-    else
-    {
+    } else {
       console.log('> got EXIF data.');
-      if (exifData['iso'])
-      {
+      if (exifData['iso']) {
         result.iso = exifData['iso'];
       }
 
-      if (exifData['aperture'])
-      {
+      if (exifData['aperture']) {
         result.aperture = exifData['aperture'];
       }
 
-      if (exifData['focal length'])
-      {
+      if (exifData['focal length']) {
         result.focalLength = exifData['focal length'].match(focalLengthRegExp)[0];
       }
 
-      if (exifData['shutter speed'])
-      {
+      if (exifData['shutter speed']) {
         result.shutterSpeed = exifData['shutter speed'];
       }
 
@@ -340,8 +297,7 @@ function getExifData(f, result, callback)
   });
 }
 
-function getHistogram(req, res)
-{
+function getHistogram(req, res) {
     var fileName = req.params.f;
     var f = path.join(config.uploadDir, fileName);
 
@@ -350,96 +306,78 @@ function getHistogram(req, res)
     var hisPath = getHisPath(thumbPath);
 
     fs.exists(hisPath, function(exists) {
-      if (exists)
-      {
+      if (exists) {
         res.json({ histogramName: hisName });
-      }
-      else
-      {
+      } else {
         createHistogram(f, function(error) {
-            if (error)
-            {        
-                res.json({ histogramName: '' });
-            }
-            else
-            {          
-                res.json({ histogramName: hisName });
-            }      
+          if (error) {
+            res.json({ histogramName: '' });
+          } else {          
+            res.json({ histogramName: hisName });
+          }      
         });
       }
     });
     
 }
 
-function createThumbnailIfNotExisting(f, callback)
-{
+function createThumbnailIfNotExisting(f, callback) {
   var thumbName = getThumbName(f);
   var thumbPath = getThumbPath(f);
 
   fs.exists(thumbPath, function(exists) {
-    if (!exists)
-    {
+    if (!exists) {
       createThumbnail(f, callback);
-    }
-    else
-    {
+    } else {
       callback(null);
     }
   });
 }
 
-function getThumbnail(req, res)
-{
-    var fileName = req.params.f;
-    var f = path.join(config.uploadDir, fileName);
+function getThumbnail(req, res) {
+  var fileName = req.params.f;
+  var f = path.join(config.uploadDir, fileName);
 
-    var thumbName = getThumbName(f);
-    var thumbPath = getThumbPath(f);
+  var thumbName = getThumbName(f);
+  var thumbPath = getThumbPath(f);
 
-    fs.exists(thumbPath, function(exists) {
-      if (exists)
-      {
-        res.json({ 
-            thumbName: thumbName,
-            generated: false,
-            existing: true,
-            generating: true
-          });
-      }
-      else
-      {
-        createThumbnail(f, function(error) {
-          if (error)
-          {        
-              res.json({ 
-                  thumbName: '',
-                  generated: false,
-                  existing: false
-                });
-          }
-          else
-          {          
-              res.json({ 
-                  thumbName: thumbName,
-                  generated: true,
-                  existing: false 
-                });
-          }
+  fs.exists(thumbPath, function(exists) {
+    if (exists) {
+      res.json({ 
+          thumbName: thumbName,
+          generated: false,
+          existing: true,
+          generating: true
         });
-      }
-    });
+    } else {
+      createThumbnail(f, function(error) {
+        if (error) {
+          res.json({ 
+              thumbName: '',
+              generated: false,
+              existing: false
+            });
+        } else {
+          res.json({ 
+              thumbName: thumbName,
+              generated: true,
+              existing: false 
+            });
+        }
+      });
+    }
+  });
 }
 
-function getExif(req, res)
-{
-    var fileName = req.params.f;
-    var f = path.join(config.uploadDir, fileName);
+function getExif(req, res) {
+  var fileName = req.params.f;
+  var f = path.join(config.uploadDir, fileName);
 
-    var exifData = {
-      iso: '',
-      aperture: '',
-      focalLength: '',
-      shutterSpeed: ''
+  var exifData = {
+    iso: '',
+    aperture: '',
+    focalLength: '',
+    shutterSpeed: ''
   };
   
   getExifData(f, exifData, function(exifError) {
@@ -447,25 +385,20 @@ function getExif(req, res)
   });
 }
 
-function getExifAll(req, res)
-{
+function getExifAll(req, res) {
   var fileName = req.params.f;
   var f = path.join(config.uploadDir, fileName);
 
   exif(f, function(err, exifData) {
-    if (err)
-    {
+    if (err) {
       res.json(err);
-    }
-    else
-    {
+    } else {
       res.json(exifData);
     }
   });
 }
 
-function getViewerWidthOptimizedWidth(req, res)
-{
+function getViewerWidthOptimizedWidth(req, res) {
   var fileName = req.params.f;
   var f = path.join(config.uploadDir, fileName);
 
@@ -487,8 +420,8 @@ function getViewerWidthOptimizedWidth(req, res)
       newPixels: -1,
       scale: 1.0
     };
-    if (!err)
-    {
+
+    if (!err) {
       result.imageWidth = size.width;
       result.imageHeight = size.height;
       var imagePixels = size.width * size.height;
@@ -517,8 +450,7 @@ function getViewerWidthOptimizedWidth(req, res)
   });
 }
 
-function resizeImage(req, res)
-{
+function resizeImage(req, res) {
   var fileName = req.params.f;
   var f = path.join(config.uploadDir, fileName);
 
@@ -526,69 +458,54 @@ function resizeImage(req, res)
 
   createResizedImageIfNotExisting(f, scale, function(err) {
     var result = {
-        imageName: getSizeName(f, scale),
-        success: false
-      };
-    if (!err) 
-    {
+      imageName: getSizeName(f, scale),
+      success: false
+    };
+
+    if (!err) {
       result.success = true;
     }
     res.json(result);
   });
 }
 
-function enableDemo(req, res)
-{
+function enableDemo(req, res) {
   enableDebugQueue();
   res.send(200);
 }
 
-function pushExamples(req, res)
-{
+function pushExamples(req, res) {
   enableDebugQueue();
   queueAllExamples();
   res.send(200);
 }
 
-function processFile(f, callback)
-{
+function processFile(f, callback) {
   var resizeNextF = function(i, callback1) {
-    if (i < imageScales.length)
-    {
+    if (i < imageScales.length) {
       createResizedImageIfNotExisting(f, imageScales[i], function(err) {
-        if (!err)
-        {
+        if (!err) {
           i++;
           resizeNextF(i, callback1);
-        }
-        else
-        {
+        } else {
           callback1(err);
         }
       });
-    }
-    else
-    {
+    } else {
       callback1(null);
     }
   };
 
   createHistogramIfNotExisting(f, function(hisErr) {
-    if (!hisErr)
-    {
+    if (!hisErr) {
       resizeNextF(0, function(resizeErr) {
-        if (!resizeErr)
-        {
+        if (!resizeErr) {
           callback(null);
-        }
-        else
-        {          
+        } else {
           callback(resizeErr);
         }
       });
-    }
-    else
-    {
+    } else {
       callback(hisErr);
     }
   });
