@@ -24,6 +24,7 @@
     "exif2": "0.0.1",
     "gm": "~1.14.2",
     "network-address": "0.0.4",
-    "progress-bar": "~0.1"
+    "progress-bar": "~0.1",
+    "ncp": "~0.5"
   }
 }

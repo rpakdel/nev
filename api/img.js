@@ -3,7 +3,8 @@ var config = require('../config.js');
 var path = require('path');
 var exif = require('exif2');
 var exec = require('child_process').exec;
-var fs = require('fs-extra');
+var fs = require('fs');
+var ncp = require('ncp').ncp;
 var gm = require('gm');
 var imgQ = require('./imgQ.js');
 
@@ -11,30 +12,45 @@ var imageScales = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1];
 
 var exampleIndex = 0;
 var exampleFiles = [
-  path.join(config.uploadDir, 'example.jpg'),
-  path.join(config.uploadDir, 'example1.jpg'),
-  path.join(config.uploadDir, 'example2.jpg'),
-  path.join(config.uploadDir, 'example3.jpg'),
-  path.join(config.uploadDir, 'example4.jpg')];
-  path.join(config.uploadDir, 'example5.jpg')];
+  path.join(config.imagesDir, 'examples', 'example.jpg'),
+  path.join(config.imagesDir, 'examples', 'example1.jpg'),
+  path.join(config.imagesDir, 'examples', 'example2.jpg'),
+  path.join(config.imagesDir, 'examples', 'example3.jpg'),
+  path.join(config.imagesDir, 'examples', 'example4.jpg'),
+  path.join(config.imagesDir, 'examples', 'example5.jpg'),
+  path.join(config.imagesDir, 'examples', 'example6.jpg'),
+  path.join(config.imagesDir, 'examples', 'example7.jpg'),
+  path.join(config.imagesDir, 'examples', 'example8.jpg'),
+  path.join(config.imagesDir, 'examples', 'example9.jpg'),
+  path.join(config.imagesDir, 'examples', 'example10.jpg'),
+  path.join(config.imagesDir, 'examples', 'example11.jpg'),
+  path.join(config.imagesDir, 'examples', 'example12.jpg'),
+  path.join(config.imagesDir, 'examples', 'example13.jpg')
+];
+
+function copyFileToDir(sourceFile, destinationDir, callback) {
+  var destinationPath = path.join(destinationDir, path.basename(sourceFile));
+  var reader = fs.createReadStream(sourceFile);
+  var writer = fs.createWriteStream(destinationPath);
+  writer.on('close', function() {
+    callback(sourceFile);
+  });
+  reader.pipe(writer);
+}
 
 function copyExampleToUploadDir(exampleFile, callback) {
-  fs.copy(exampleFile, config.uploadDir, function(err) {
-    if (err) {
-      console.log('Failed to copy ' + exampleFile + ' to ' + config.uploadDir + ": " + err);
-    } else {
-      callback();
-    }
-  });
+  copyFileToDir(exampleFile, config.uploadDir, callback);
 }
 
 function queueAllExamples()  {
   console.log('Queueing all example files.');
-  for (var i in exampleFiles) {
-    copyExampleToUploadDir(exampleFiles[i], function() {
-      imgQ.pushNewFile(exampleFiles[i]);
-    });
-  }
+  fs.mkdir(config.artefactsDir, function() {
+    for (var i in exampleFiles) {
+      copyExampleToUploadDir(exampleFiles[i], function(f) {
+        imgQ.pushNewFile(f); 
+      });
+    }
+  });
 }
 
 function queueNextExample() {

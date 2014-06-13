@@ -3,7 +3,7 @@ var address = require('network-address');
 
 var httpServerIp = address();
 var publicDir = path.join(__dirname, 'public');
-var uploadDir = 'c:\\eyefi'
+var uploadDir = 'C:\\Temp\\EyeFi'
 var imagesDir = path.join(publicDir, 'images');
 var artefactsDir = path.join(uploadDir, 'artefacts');
 var processOnlyOneImage = true;
