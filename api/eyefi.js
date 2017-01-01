@@ -24,7 +24,11 @@ function setup() {
   {
     uploadPath : config.uploadDir,
     cards : mycards.card1
-  }).start();
+  });
+  
+  eyefiServer.on('error', function (err) {
+    console.trace('> Could not start EyeFi server: ' + err);
+  });
 
   eyefiServer.on('imageReceived', function(data) {
     isUploadingImage = false;
@@ -62,13 +66,14 @@ function setup() {
     currentUploadImage = getNameWithoutExtension(uploadData.filename);
   });
 
-
   setInterval(function() {
     if (!isUploadingImage) {
       eyefiConnected = false;
     }
     isUploadingImage = false;
   }, 5000);
+
+  eyefiServer.start();
 }
 
 function getEyeFiStatus(req, res) {

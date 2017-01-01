@@ -4,8 +4,7 @@ ko.bindingHandlers.progressBar = {
       var v = valueAccessor();
       if (v < prevProgressBarValue) {
         $(element).css({ width: v + '%' });
-      }
-      else {
+      } else {
         $(element).animate({ width: v + '%' }, 500);  // progress bar events are every 500ms
       }
       prevProgressBarValue = v;
@@ -39,6 +38,9 @@ var ViewModel = function() {
   this.processQueueNamesVisible = ko.observable(false);
   this.readyQueueNamesVisible = ko.observable(false);
   this.processingNamesVisible = ko.observable(false);
+  
+  // thumbnail
+  this.thumbnails = ko.observableArray();
 
   // eyefi
   this.isEyeFiConnected = ko.observable(false);
@@ -48,8 +50,6 @@ var ViewModel = function() {
     self.play(!self.play());
   }
 
-  
-  
   this.playButtonIcon = ko.computed(function() {
     // if we're paused, show play icon
     if (!self.play())
@@ -60,10 +60,10 @@ var ViewModel = function() {
     // otherwise show pause icon
     return 'pause.png';
   }, this);
+
   this.playButtonAlt = ko.computed(function() {
     // if we're paused, icon alt should say click to play
-    if (!self.play())
-    {
+    if (!self.play()) {
       return 'play';
     }
     
@@ -74,14 +74,12 @@ var ViewModel = function() {
 
   this.displayName = ko.computed(function() {
     // if image is still loading, show file name
-    if (self.isLoadingImage())
-    {
+    if (self.isLoadingImage()) {
       return self.fileName() + ' loading ... ';
     }
     
     // if screen optimized image exist, show it
-    if (self.imageName())
-    {
+    if (self.imageName()) {
       return self.imageName();
     }
 
@@ -90,37 +88,30 @@ var ViewModel = function() {
   }, this);
 
   this.computeExifArray = ko.computed(function() {
-    if (self.fileName())
-    {
+    if (self.fileName()) {
       $.get('api/exifall/' + self.fileName(), function(exifData) {
         self.setExifArray(exifData);
       });
     }
   }, this);
 
-  this.setExifArray = function(exifData)
-  {
+  this.setExifArray = function(exifData) {
     self.exifArray.removeAll();
-    if (exifData)
-    {
+    if (exifData) {
       // ISO
-      if (exifData.iso)
-      {
+      if (exifData.iso) {
         self.exifArray.push('ISO' + exifData.iso);
       }
       // aperture
-      if (exifData.aperture)
-      {
+      if (exifData.aperture) {
         self.exifArray.push('f' + exifData.aperture);
       }
       // focal length
-      if (exifData['focal length'])
-      {
+      if (exifData['focal length']) {
         var focalLength = exifData['focal length'];    
         self.exifArray.push(focalLength.substr(0, focalLength.indexOf(' ')) + 'mm');
       }
-      if (exifData['shutter speed'])
-      {
+      if (exifData['shutter speed']) {
         // shutter speed
         self.exifArray.push(exifData['shutter speed'] + 's');
       }
@@ -129,19 +120,16 @@ var ViewModel = function() {
 
   this.loadHistogramState = function() {
     var stateStr = localStorage.getItem('nev.histogram');
-    if (stateStr !== null)
-    {
+    if (stateStr !== null) {
       var state = JSON.parse(stateStr);
 
       var $win = $(window);
 
-      if ((state.position.left + self.histogramSize.width) > $win.width())
-      {
+      if ((state.position.left + self.histogramSize.width) > $win.width()) {
           state.position.left = $win.width - self.histogramSize.width;
       }
 
-      if ((state.position.top + self.histogramSize.height) > $win.height())
-      {
+      if ((state.position.top + self.histogramSize.height) > $win.height()) {
           state.position.top = $win.height() - self.histogramSize.height;
       }
 
@@ -157,8 +145,7 @@ var ViewModel = function() {
 
   this.setHistogramPosition = function(newPosition)
   {
-    self.histogramState(
-    { 
+    self.histogramState({
       enabled: self.histogramState().enabled, 
       position: newPosition
     });
@@ -172,8 +159,7 @@ var ViewModel = function() {
   };
 
   this.getHistogramImageName = ko.computed(function() {
-    if (self.histogramState().enabled && self.fileName() && self.fileName().length > 0)
-    {
+    if (self.histogramState().enabled && self.fileName() && self.fileName().length > 0) {
       $.get('api/histogram/' + self.fileName(), function(data) {
         if (data && data.histogramName && data.histogramName.length > 0)
         {
@@ -184,8 +170,7 @@ var ViewModel = function() {
   }, this);
 
   this.isHistogramVisible = ko.computed(function() {
-    if (self.fileName() === null || self.fileName() === '' || self.histogramImageName() === null || self.histogramImageName() === '')
-    {
+    if (self.fileName() === null || self.fileName() === '' || self.histogramImageName() === null || self.histogramImageName() === '') {
       return false;
     }
     return self.histogramState().enabled;
@@ -200,18 +185,15 @@ var ViewModel = function() {
   }, this);
 
   this.isResetHistogramVisible = ko.computed(function() {
-    if (!self.isHistogramVisible())
-    {
+    if (!self.isHistogramVisible()) {
       return false;
     }
 
-    if (self.histogramState().position.left != 4)
-    {
+    if (self.histogramState().position.left != 4) {
       return true;
     }
 
-    if (self.histogramState().position.top != 36)
-    {
+    if (self.histogramState().position.top != 36) {
       return true;
     }
 
@@ -226,24 +208,21 @@ var ViewModel = function() {
     $.get('api/queue?namesOnly', function(queues) {
         self.readyQueueNames.removeAll();
         var rl = queues.readyQueue.length;
-        for (var r = 0; r < rl; r++) 
-        {
+        for (var r = 0; r < rl; r++) {
           self.readyQueueNames.push(queues.readyQueue[r]);
         }
         self.readyQueueNamesVisible(self.readyQueueNames().length > 0);
 
         self.processQueueNames.removeAll();
         var pl = queues.processQueue.length;
-        for (var p = 0; p < pl; ++p)
-        {
+        for (var p = 0; p < pl; ++p) {
           self.processQueueNames.push(queues.processQueue[p]);
         }
         self.processQueueNamesVisible(self.processQueueNames().length > 0);
 
         self.processingNames.removeAll();
         var ql = queues.processingImages.length;
-        for (var q = 0; q < ql; ++q)
-        {
+        for (var q = 0; q < ql; ++q) {
           self.processingNames.push(queues.processingImages[q]);
         }
         self.processingNamesVisible(self.processingNames().length > 0);
@@ -257,8 +236,7 @@ var ViewModel = function() {
     });
   }
 
-  this.loadImage = function (imageName)
-  {
+  this.loadImage = function (imageName) {
     self.isLoadingImage(true);
     self.loadImageHelper(imageName, function () {
       self.imageName(imageName);
@@ -266,9 +244,7 @@ var ViewModel = function() {
     });
   }
   
-  
-  this.loadImageHelper = function (imageName, callback)
-  {
+  this.loadImageHelper = function (imageName, callback) {
     var imgPreload = new Image();
     $(imgPreload).attr({ src: imageName, alt: imageName });
 
@@ -276,8 +252,7 @@ var ViewModel = function() {
     if (imgPreload.complete || imgPreload.readyState === 4) {
       // image loaded
       callback();
-    }
-    else {
+    } else {
       // go fetch the image
       $(imgPreload).load(function (response, status, xhr) {
         callback();
@@ -285,26 +260,21 @@ var ViewModel = function() {
     }
   }
 
-  this.displayImage = function(fName, optimize)
-  {
-    // set the name of the file we will be displayed
+  this.displayImage = function(fName, optimize) {
+    // set onle name of the file we will be displayed
     self.fileName(fName);
 
     // optionally optimize the size of the image
-    if (optimize)
-    {
+    if (optimize) {
       self.getScreenOptimizedImage(fName, function (newImageName) {
         self.loadImage(newImageName);
       });
-    }
-    else
-    {
+    } else {
       self.loadImage(fName);
     }
   }
 
-  this.getScreenOptimizedImage = function (fName, callback)
-  {
+  this.getScreenOptimizedImage = function (fName, callback) {
     var newImageName = fName;
     $.get(
       'api/optimized/' + fName + '/' + $(window).width() + '/' + $(window).height(),

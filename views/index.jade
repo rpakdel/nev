@@ -67,4 +67,5 @@ html(lang="en")
             #progressBarContainer
               #progressBar(data-bind='progressBar: eyefiUploadProgressPercent()')
 
-      #thumbnailContainer
+      #thumbnailContainer(data-bind='foreach: thumbnails')
+        img.thumbnail(data-bind='attr { alt: $data.alt, fileName: $data.fname }')
